@@ -55,11 +55,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'yoklama_sistemi.wsgi.application'
 
 # Database
+# Eski DATABASES kısmını tamamen sil ve bunu yapıştır
 DATABASES = {
-    'default': dj_database_url.config(
-        default='postgresql://yoklama_user:whusmyvWraa95Is9pP2hN2Yy4KutKneA@dpg-d65ql1lum26s73ag41s0-a/yoklama_db_ybl3',
-        conn_max_age=600
-    )
+    'default': dj_database_url.parse('postgresql://yoklama_user:whusmyvWraa95Is9pP2hN2Yy4KutKneA@dpg-d65ql1lum26s73ag41s0-a/yoklama_db_ybl3')
 }
 
 # Şifre doğrulama
