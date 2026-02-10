@@ -1,5 +1,4 @@
 ﻿asgiref==3.8.1
-backports.zoneinfo==0.2.1
 crispy-bootstrap4==2025.6
 django==4.2.28
 django-crispy-forms==2.4
@@ -9,3 +8,4 @@ sqlparse==0.5.5
 typing-extensions==4.13.2
 tzdata==2025.3
 gunicorn
+
