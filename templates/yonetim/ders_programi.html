@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Ders Programı - Admin Paneli{% endblock %}
+{% block content %}
+
+<div style="background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); color: white; padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+    <div class="row align-items-center">
+        <div class="col"><h1><i class="ti ti-calendar-event me-3"></i>Ders Programı Yönetimi</h1></div>
+        <div class="col-auto"><a href="{% url 'ders_programi_ekle' %}" class="btn btn-light btn-lg"><i class="ti ti-plus me-2"></i>Yeni Ders</a></div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <select name="ogretmen" class="form-select"><option value="">Tüm Öğretmenler</option>{% for ogretmen in ogretmenler %}<option value="{{ ogretmen.id }}" {% if secili_ogretmen == ogretmen.id|stringformat:"s" %}selected{% endif %}>{{ ogretmen.get_full_name }}</option>{% endfor %}</select>
+            </div>
+            <div class="col-md-3">
+                <select name="sinif" class="form-select"><option value="">Tüm Sınıflar</option>{% for sinif in siniflar %}<option value="{{ sinif.id }}" {% if secili_sinif == sinif.id|stringformat:"s" %}selected{% endif %}>{{ sinif.ad }}</option>{% endfor %}</select>
+            </div>
+            <div class="col-md-3">
+                <select name="gun" class="form-select"><option value="">Tüm Günler</option><option value="1">Pazartesi</option><option value="2">Salı</option><option value="3">Çarşamba</option><option value="4">Perşembe</option><option value="5">Cuma</option><option value="6">Cumartesi</option><option value="7">Pazar</option></select>
+            </div>
+            <div class="col-md-3"><button type="submit" class="btn btn-primary w-100"><i class="ti ti-search"></i></button></div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead><tr><th>Gün</th><th>Saat</th><th>Sınıf</th><th>Öğretmen</th><th>Derslik</th><th>Durum</th><th>İşlemler</th></tr></thead>
+            <tbody>
+                {% for ders in dersler %}
+                <tr>
+                    <td><strong>{{ ders.get_gun_display }}</strong></td>
+                    <td><span class="badge bg-primary" style="font-size:0.95rem;">{{ ders.baslangic_saati }} - {{ ders.bitis_saati }}</span></td>
+                    <td>{{ ders.sinif.ad }}</td>
+                    <td>{{ ders.ogretmen.get_full_name }}</td>
+                    <td>{{ ders.derslik|default:"-" }}</td>
+                    <td>{% if ders.aktif %}<span class="badge bg-success">Aktif</span>{% else %}<span class="badge bg-secondary">Pasif</span>{% endif %}</td>
+                    <td>
+                        <a href="{% url 'ders_programi_duzenle' ders.id %}" class="btn btn-sm btn-outline-primary"><i class="ti ti-edit"></i></a>
+                        <a href="{% url 'ders_programi_sil' ders.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Silmek istediğinize emin misiniz?')"><i class="ti ti-trash"></i></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center py-5">Ders bulunamadı.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="mt-3"><a href="{% url 'yonetim_panel' %}" class="btn btn-outline-secondary btn-lg"><i class="ti ti-arrow-left me-2"></i>Geri</a></div>
+
+{% endblock %}

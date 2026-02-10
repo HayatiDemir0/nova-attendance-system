@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}Takvim - Yoklama Sistemi{% endblock %}
+
+{% block content %}  {# <--- BURAYI EKLEDİK #}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{{ ay_adi }} {{ yil }}</h2>
+        <div>
+            <a href="{% url 'takvim' %}?yil={{ onceki_yil }}&ay={{ onceki_ay }}" class="btn btn-outline-primary">
+                <i class="bi bi-chevron-left"></i> Önceki
+            </a>
+            <a href="{% url 'takvim' %}" class="btn btn-primary">Bugün</a>
+            <a href="{% url 'takvim' %}?yil={{ sonraki_yil }}&ay={{ sonraki_ay }}" class="btn btn-outline-primary">
+                Sonraki <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-bordered text-center">
+                <thead>
+                    <tr>
+                        <th>Pazartesi</th>
+                        <th>Salı</th>
+                        <th>Çarşamba</th>
+                        <th>Perşembe</th>
+                        <th>Cuma</th>
+                        <th>Cumartesi</th>
+                        <th>Pazar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for hafta in takvim %}
+                    <tr style="height: 120px;">
+                        {% for gun in hafta %}
+                        <td class="{% if gun == bugun.day and ay == bugun.month and yil == bugun.year %}bg-primary bg-opacity-10{% endif %}">
+                            {% if gun != 0 %}
+                                <strong>{{ gun }}</strong>
+                                {% if gun in yoklamalar %}
+                                    <div class="mt-2">
+                                        {# get_item filtresinin doğru tanımlandığından emin olun #}
+                                        {% for yoklama in yoklamalar|get_item:gun %}
+                                        <div class="badge bg-success mb-1 d-block text-wrap">
+                                            <small>{{ yoklama.sinif.ad }}</small>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %} 

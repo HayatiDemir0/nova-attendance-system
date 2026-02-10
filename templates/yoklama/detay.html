@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Yoklama Detayı - Yoklama Sistemi{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2>Yoklama Detayı</h2>
+        <p class="text-muted mb-0">
+            {{ yoklama.ders_basligi }} - {{ yoklama.sinif.ad }} | {{ yoklama.tarih|date:"d.m.Y" }}
+        </p>
+    </div>
+    <a href="{% url 'yoklama_gecmis' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Geri
+    </a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Toplam</h6>
+                <h3>{{ istatistik.toplam }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-success">
+            <div class="card-body">
+                <h6 class="text-success">Var</h6>
+                <h3 class="text-success">{{ istatistik.var }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-danger">
+            <div class="card-body">
+                <h6 class="text-danger">Yok</h6>
+                <h3 class="text-danger">{{ istatistik.yok }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center border-warning">
+            <div class="card-body">
+                <h6 class="text-warning">İzinli/Geç</h6>
+                <h3 class="text-warning">{{ istatistik.izinli|add:istatistik.gec }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Ad Soyad</th>
+                        <th>Durum</th>
+                        <th>Not</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detay in detaylar %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ detay.ogrenci.tam_ad }}</td>
+                        <td>
+                            {% if detay.durum == 'var' %}
+                                <span class="badge bg-success">✅ Var</span>
+                            {% elif detay.durum == 'yok' %}
+                                <span class="badge bg-danger">❌ Yok</span>
+                            {% elif detay.durum == 'izinli' %}
+                                <span class="badge bg-warning">🏥 İzinli</span>
+                            {% elif detay.durum == 'gec' %}
+                                <span class="badge bg-info">⏰ Geç Kaldı</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ detay.not_durumu|default:"-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

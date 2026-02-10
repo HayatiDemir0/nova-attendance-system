@@ -1,0 +1,306 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Paneli - Nova Akademi{% endblock %}
+
+{% block content %}
+
+<style>
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        transition: transform 0.3s;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-card.purple {
+        background: linear-gradient(135deg, #7B3F9D 0%, #E91E63 100%);
+    }
+    
+    .stat-card.cyan {
+        background: linear-gradient(135deg, #00BCD4 0%, #00ACC1 100%);
+    }
+    
+    .stat-card.green {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    }
+    
+    .stat-card.orange {
+        background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+    }
+    
+    .stat-card .stat-number {
+        font-size: 3.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-card .stat-label {
+        font-size: 1.2rem;
+        opacity: 0.95;
+    }
+    
+    .stat-card .stat-icon {
+        font-size: 5rem;
+        opacity: 0.2;
+        position: absolute;
+        right: 20px;
+        top: 20px;
+    }
+    
+    .activity-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        margin-bottom: 1.5rem;
+    }
+    
+    .activity-item {
+        padding: 1rem;
+        border-left: 4px solid #7B3F9D;
+        margin-bottom: 1rem;
+        background: #f8f9fa;
+        border-radius: 5px;
+        transition: all 0.3s;
+    }
+    
+    .activity-item:hover {
+        background: #e9ecef;
+        border-left-color: #E91E63;
+        transform: translateX(5px);
+    }
+    
+    .quick-action {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s;
+        border: 2px solid transparent;
+        text-decoration: none;
+        display: block;
+    }
+    
+    .quick-action:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(123, 63, 157, 0.2);
+        border-color: #7B3F9D;
+    }
+    
+    .quick-action i {
+        font-size: 3rem;
+        color: #7B3F9D;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    
+    .quick-action h6 {
+        color: #333;
+        margin: 0;
+        font-weight: 600;
+    }
+    
+    .page-header-admin {
+        background: linear-gradient(135deg, #7B3F9D 0%, #E91E63 50%, #00BCD4 100%);
+        color: white;
+        padding: 2.5rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(123, 63, 157, 0.3);
+    }
+    
+    .page-header-admin h1 {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin: 0;
+    }
+    
+    .page-header-admin p {
+        margin: 0;
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+</style>
+
+<!-- Başlık -->
+<div class="page-header-admin">
+    <h1><i class="ti ti-dashboard me-3"></i>Admin Paneli</h1>
+    <p class="lead mb-0">Hoş geldiniz, {{ user.get_full_name }}!</p>
+</div>
+
+<!-- İstatistik Kartları -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="stat-card purple position-relative">
+            <i class="ti ti-users stat-icon"></i>
+            <div class="stat-number">{{ toplam_ogretmen }}</div>
+            <div class="stat-label">Öğretmen</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card cyan position-relative">
+            <i class="ti ti-door stat-icon"></i>
+            <div class="stat-number">{{ toplam_sinif }}</div>
+            <div class="stat-label">Sınıf</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card green position-relative">
+            <i class="ti ti-user stat-icon"></i>
+            <div class="stat-number">{{ toplam_ogrenci }}</div>
+            <div class="stat-label">Öğrenci</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card orange position-relative">
+            <i class="ti ti-clipboard-check stat-icon"></i>
+            <div class="stat-number">{{ bugun_yoklama }}</div>
+            <div class="stat-label">Bugünkü Yoklama</div>
+        </div>
+    </div>
+</div>
+
+<!-- Hızlı Erişim -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h3 class="mb-3"><i class="ti ti-rocket me-2"></i>Hızlı Erişim</h3>
+    </div>
+    <div class="col-md-2">
+        <a href="{% url 'yonetim_ogretmenler' %}" class="quick-action">
+            <i class="ti ti-users"></i>
+            <h6>Öğretmenler</h6>
+        </a>
+    </div>
+    <div class="col-md-2">
+        <a href="{% url 'yonetim_siniflar' %}" class="quick-action">
+            <i class="ti ti-door"></i>
+            <h6>Sınıflar</h6>
+        </a>
+    </div>
+    <div class="col-md-2">
+        <a href="{% url 'yonetim_ogrenciler' %}" class="quick-action">
+            <i class="ti ti-user"></i>
+            <h6>Öğrenciler</h6>
+        </a>
+    </div>
+    <div class="col-md-2">
+        <a href="{% url 'yonetim_ders_programi' %}" class="quick-action">
+            <i class="ti ti-calendar-event"></i>
+            <h6>Ders Programı</h6>
+        </a>
+    </div>
+    <div class="col-md-2">
+        <a href="{% url 'yonetim_yoklamalar' %}" class="quick-action">
+            <i class="ti ti-clipboard-check"></i>
+            <h6>Yoklamalar</h6>
+        </a>
+    </div>
+    <div class="col-md-2">
+        <a href="{% url 'yonetim_ayarlar' %}" class="quick-action">
+            <i class="ti ti-settings"></i>
+            <h6>Ayarlar</h6>
+        </a>
+    </div>
+</div>
+
+<!-- Son Aktiviteler -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="activity-card">
+            <h4 class="mb-4">
+                <i class="ti ti-clock-hour-4 me-2 text-primary"></i>Son Yoklamalar
+            </h4>
+            {% if son_yoklamalar %}
+                {% for yoklama in son_yoklamalar %}
+                <div class="activity-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1">{{ yoklama.sinif.ad }} - {{ yoklama.ders_basligi|truncatewords:5 }}</h6>
+                            <small class="text-muted">
+                                <i class="ti ti-user me-1"></i>{{ yoklama.ogretmen.get_full_name }}
+                            </small>
+                        </div>
+                        <small class="text-muted">{{ yoklama.tarih|date:"d.m.Y" }}</small>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">Henüz yoklama alınmamış.</p>
+            {% endif %}
+            <a href="{% url 'yonetim_yoklamalar' %}" class="btn btn-outline-primary w-100 mt-3">
+                <i class="ti ti-arrow-right me-2"></i>Tüm Yoklamaları Gör
+            </a>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="activity-card">
+            <h4 class="mb-4">
+                <i class="ti ti-user-plus me-2 text-success"></i>Yeni Eklenen Öğrenciler
+            </h4>
+            {% if son_ogrenciler %}
+                {% for ogrenci in son_ogrenciler %}
+                <div class="activity-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1">{{ ogrenci.tam_ad }}</h6>
+                            <small class="text-muted">
+                                <i class="ti ti-door me-1"></i>{{ ogrenci.sinif.ad }}
+                            </small>
+                        </div>
+                        <span class="badge bg-success">Aktif</span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">Henüz öğrenci eklenmemiş.</p>
+            {% endif %}
+            <a href="{% url 'yonetim_ogrenciler' %}" class="btn btn-outline-success w-100 mt-3">
+                <i class="ti ti-arrow-right me-2"></i>Tüm Öğrencileri Gör
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Aylık İstatistik -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="activity-card">
+            <h4 class="mb-3">
+                <i class="ti ti-chart-bar me-2 text-info"></i>Bu Ay Özeti
+            </h4>
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <div class="p-3">
+                        <h2 class="text-primary mb-2">{{ bu_ay_yoklama }}</h2>
+                        <p class="text-muted mb-0">Alınan Yoklama</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3">
+                        <h2 class="text-success mb-2">{{ toplam_ders }}</h2>
+                        <p class="text-muted mb-0">Aktif Ders</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3">
+                        <h2 class="text-warning mb-2">{{ toplam_sinif }}</h2>
+                        <p class="text-muted mb-0">Toplam Sınıf</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

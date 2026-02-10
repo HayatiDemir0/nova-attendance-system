@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Ders Ekle - Yoklama Sistemi{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Yeni Ders Ekle</h2>
+    <a href="{% url 'ders_programi_listesi' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Geri
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Öğretmen</label>
+                    {{ form.ogretmen }}
+                    {% if form.ogretmen.errors %}
+                        <div class="text-danger small">{{ form.ogretmen.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Sınıf</label>
+                    {{ form.sinif }}
+                    {% if form.sinif.errors %}
+                        <div class="text-danger small">{{ form.sinif.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Ders Adı</label>
+                    {{ form.ders_adi }}
+                    {% if form.ders_adi.errors %}
+                        <div class="text-danger small">{{ form.ders_adi.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Gün</label>
+                    {{ form.gun }}
+                    {% if form.gun.errors %}
+                        <div class="text-danger small">{{ form.gun.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Başlangıç Saati</label>
+                    {{ form.baslangic_saati }}
+                    {% if form.baslangic_saati.errors %}
+                        <div class="text-danger small">{{ form.baslangic_saati.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Bitiş Saati</label>
+                    {{ form.bitis_saati }}
+                    {% if form.bitis_saati.errors %}
+                        <div class="text-danger small">{{ form.bitis_saati.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-check mb-3">
+                {{ form.aktif }}
+                <label class="form-check-label">Aktif</label>
+            </div>
+            
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Kaydet
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

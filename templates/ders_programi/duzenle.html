@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Ders Düzenle - Yoklama Sistemi{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Ders Düzenle: {{ ders.ders_adi }}</h2>
+    <a href="{% url 'ders_programi_listesi' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Geri
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Öğretmen</label>
+                    {{ form.ogretmen }}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Sınıf</label>
+                    {{ form.sinif }}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Ders Adı</label>
+                    {{ form.ders_adi }}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Gün</label>
+                    {{ form.gun }}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Başlangıç Saati</label>
+                    {{ form.baslangic_saati }}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Bitiş Saati</label>
+                    {{ form.bitis_saati }}
+                </div>
+            </div>
+            
+            <div class="form-check mb-3">
+                {{ form.aktif }}
+                <label class="form-check-label">Aktif</label>
+            </div>
+            
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Güncelle
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

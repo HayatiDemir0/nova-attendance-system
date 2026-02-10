@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}Öğrenci Yönetimi - Admin Paneli{% endblock %}
+{% block content %}
+
+<div style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+    <div class="row align-items-center">
+        <div class="col"><h1><i class="ti ti-user me-3"></i>Öğrenci Yönetimi</h1></div>
+        <div class="col-auto"><a href="{% url 'ogrenci_ekle' %}" class="btn btn-light btn-lg"><i class="ti ti-plus me-2"></i>Yeni Öğrenci</a></div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <select name="sinif" class="form-select">
+                    <option value="">Tüm Sınıflar</option>
+                    {% for sinif in siniflar %}
+                    <option value="{{ sinif.id }}" {% if secili_sinif == sinif.id|stringformat:"s" %}selected{% endif %}>{{ sinif.ad }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="aktif" class="form-select">
+                    <option value="">Hepsi</option>
+                    <option value="1" {% if secili_aktif == "1" %}selected{% endif %}>Aktif</option>
+                    <option value="0" {% if secili_aktif == "0" %}selected{% endif %}>Pasif</option>
+                </select>
+            </div>
+            <div class="col-md-5">
+                <input type="text" name="q" class="form-control" placeholder="Ad, soyad, TC ara..." value="{{ q|default:'' }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100"><i class="ti ti-search"></i> Ara</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header" style="background: #f8f9fa; border-bottom: 2px solid #4CAF50;">
+        <h3>Toplam {{ ogrenciler.count }} Öğrenci</h3>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>#</th><th>Fotoğraf</th><th>Ad Soyad</th><th>TC</th><th>Sınıf</th><th>Veli</th><th>Telefon</th><th>Durum</th><th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ogrenci in ogrenciler %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        {% if ogrenci.fotograf %}
+                        <img src="{{ ogrenci.fotograf.url }}" class="rounded-circle" style="width:40px;height:40px;object-fit:cover;">
+                        {% else %}
+                        <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center" style="width:40px;height:40px;">{{ ogrenci.ad.0 }}{{ ogrenci.soyad.0 }}</div>
+                        {% endif %}
+                    </td>
+                    <td><strong>{{ ogrenci.tam_ad }}</strong></td>
+                    <td>{{ ogrenci.tc_kimlik }}</td>
+                    <td><span class="badge bg-info">{{ ogrenci.sinif.ad }}</span></td>
+                    <td>{{ ogrenci.veli_adi|default:"-" }}</td>
+                    <td>{{ ogrenci.veli_telefon|default:"-" }}</td>
+                    <td>{% if ogrenci.aktif %}<span class="badge bg-success">Aktif</span>{% else %}<span class="badge bg-secondary">Pasif</span>{% endif %}</td>
+                    <td>
+                        <a href="{% url 'ogrenci_duzenle' ogrenci.id %}" class="btn btn-sm btn-outline-primary"><i class="ti ti-edit"></i></a>
+                        <a href="{% url 'ogrenci_sil' ogrenci.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Silmek istediğinize emin misiniz?')"><i class="ti ti-trash"></i></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="9" class="text-center py-5"><i class="ti ti-user" style="font-size:4rem;opacity:0.3;"></i><p class="text-muted mt-3">Öğrenci bulunamadı.</p></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="mt-3"><a href="{% url 'yonetim_panel' %}" class="btn btn-outline-secondary btn-lg"><i class="ti ti-arrow-left me-2"></i>Geri</a></div>
+
+{% endblock %}

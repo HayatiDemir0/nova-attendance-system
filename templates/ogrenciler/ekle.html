@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Öğrenci Ekle - Yoklama Sistemi{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Yeni Öğrenci Ekle</h2>
+    <a href="{% url 'ogrenci_listesi' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Geri
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <h5 class="mb-3">Öğrenci Bilgileri</h5>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Ad</label>
+                    {{ form.ad }}
+                    {% if form.ad.errors %}<div class="text-danger small">{{ form.ad.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Soyad</label>
+                    {{ form.soyad }}
+                    {% if form.soyad.errors %}<div class="text-danger small">{{ form.soyad.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">TC Kimlik No</label>
+                    {{ form.tc_kimlik }}
+                    {% if form.tc_kimlik.errors %}<div class="text-danger small">{{ form.tc_kimlik.errors }}</div>{% endif %}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Doğum Tarihi</label>
+                    {{ form.dogum_tarihi }}
+                    {% if form.dogum_tarihi.errors %}<div class="text-danger small">{{ form.dogum_tarihi.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Cinsiyet</label>
+                    {{ form.cinsiyet }}
+                    {% if form.cinsiyet.errors %}<div class="text-danger small">{{ form.cinsiyet.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Sınıf</label>
+                    {{ form.sinif }}
+                    {% if form.sinif.errors %}<div class="text-danger small">{{ form.sinif.errors }}</div>{% endif %}
+                </div>
+            </div>
+            
+            <h5 class="mb-3 mt-4">Veli Bilgileri</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Veli Adı</label>
+                    {{ form.veli_adi }}
+                    {% if form.veli_adi.errors %}<div class="text-danger small">{{ form.veli_adi.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Veli Telefon</label>
+                    {{ form.veli_telefon }}
+                    {% if form.veli_telefon.errors %}<div class="text-danger small">{{ form.veli_telefon.errors }}</div>{% endif %}
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Adres</label>
+                {{ form.adres }}
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Profil Resmi</label>
+                {{ form.profil_resmi }}
+            </div>
+            
+            <div class="form-check mb-3">
+                {{ form.aktif }}
+                <label class="form-check-label">Aktif</label>
+            </div>
+            
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Kaydet
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

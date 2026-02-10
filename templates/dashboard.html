@@ -1,0 +1,306 @@
+{% extends 'base.html' %}
+
+{% block title %}Anasayfa - Nova Akademi{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Dashboard Kartlarını Büyüt */
+    .dashboard-card {
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+    }
+    
+    .dashboard-card h3 {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 1.5rem;
+    }
+    
+    .ders-card {
+        background: white;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 5px solid #7B3F9D;
+        border-radius: 10px;
+        box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s;
+    }
+    
+    .ders-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 25px rgba(123, 63, 157, 0.2);
+    }
+    
+    .ders-card h5 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #7B3F9D;
+        margin-bottom: 1rem;
+    }
+    
+    .ders-card p {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        color: #6c757d;
+    }
+    
+    .ders-card .badge {
+        font-size: 1rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    .btn-yoklama {
+        font-size: 1.2rem;
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+    
+    .stat-card.purple {
+        background: linear-gradient(135deg, #7B3F9D 0%, #E91E63 100%);
+    }
+    
+    .stat-card.cyan {
+        background: linear-gradient(135deg, #00BCD4 0%, #00ACC1 100%);
+    }
+    
+    .stat-card.green {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    }
+    
+    .stat-card.orange {
+        background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+    }
+    
+    .stat-card h2 {
+        font-size: 3.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-card p {
+        font-size: 1.3rem;
+        opacity: 0.95;
+        margin: 0;
+    }
+    
+    .yoklama-table {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+    }
+    
+    .yoklama-table h4 {
+        font-size: 1.6rem;
+        margin-bottom: 1.5rem;
+        color: #28a745;
+    }
+    
+    .page-header-dashboard {
+        background: linear-gradient(135deg, #7B3F9D 0%, #E91E63 50%, #00BCD4 100%);
+        color: white;
+        padding: 2.5rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(123, 63, 157, 0.3);
+    }
+    
+    .page-header-dashboard h1 {
+        font-size: 2.8rem;
+        font-weight: bold;
+        margin: 0;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: #f8f9fa;
+        border-radius: 15px;
+    }
+    
+    .empty-state i {
+        font-size: 5rem;
+        color: #dee2e6;
+        margin-bottom: 1.5rem;
+    }
+    
+    .empty-state h4 {
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+</style>
+
+{% if user.role == 'ogretmen' %}
+
+<!-- Öğretmen Dashboard -->
+<div class="page-header-dashboard">
+    <h1><i class="ti ti-home me-3"></i>Hoş Geldiniz, {{ user.get_full_name }}!</h1>
+    <p class="lead mb-0">Bugün {{ bugun_dersler.count }} dersiniz var</p>
+</div>
+
+<!-- Bugünkü Dersler -->
+<div class="card dashboard-card">
+    <h3>
+        <i class="ti ti-calendar-event me-2 text-primary"></i>Bugünkü Derslerim
+    </h3>
+    
+    {% if bugun_dersler %}
+        {% for ders in bugun_dersler %}
+        <div class="ders-card">
+            <div class="row align-items-center">
+                <div class="col-md-7">
+                    <h5>{{ ders.sinif.ad }}</h5>
+                    <p class="mb-2">
+                        <i class="ti ti-clock me-2"></i>
+                        <strong>{{ ders.baslangic_saati|slice:":5" }} - {{ ders.bitis_saati|slice:":5" }}</strong>
+                    </p>
+                    <p class="mb-0">
+                        <i class="ti ti-door me-2"></i>
+                        {% if ders.derslik %}
+                            {{ ders.derslik }}
+                        {% else %}
+                            <span class="text-muted">Derslik belirtilmemiş</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="col-md-5 text-end">
+                    <a href="{% url 'yoklama_al' ders.id %}" class="btn btn-primary btn-yoklama">
+                        <i class="ti ti-clipboard-check me-2"></i>Yoklama Al
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <i class="ti ti-calendar-off"></i>
+            <h4>Bugün için ders programınız bulunmamaktadır</h4>
+            <p class="text-muted">İyi günler dileriz!</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Bugün Alınan Yoklamalar -->
+{% if bugun_yoklamalar %}
+<div class="yoklama-table">
+    <h4>
+        <i class="ti ti-check me-2"></i>Bugün Aldığım Yoklamalar
+    </h4>
+    
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th style="font-size: 1.1rem;">Sınıf</th>
+                    <th style="font-size: 1.1rem;">Ders Konusu</th>
+                    <th style="font-size: 1.1rem;">Saat</th>
+                    <th style="font-size: 1.1rem;">İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for yoklama in bugun_yoklamalar %}
+                <tr>
+                    <td><span class="badge bg-info" style="font-size: 1rem;">{{ yoklama.sinif.ad }}</span></td>
+                    <td style="font-size: 1.1rem;">{{ yoklama.ders_basligi }}</td>
+                    <td style="font-size: 1.1rem;">{{ yoklama.olusturma_zamani|time:"H:i" }}</td>
+                    <td>
+                        <a href="{% url 'yoklama_detay' yoklama.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="ti ti-eye me-1"></i>Detay
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% else %}
+
+<!-- Admin Dashboard -->
+<div class="page-header-dashboard">
+    <h1><i class="ti ti-dashboard me-3"></i>Yönetim Paneli</h1>
+    <p class="lead mb-0">Sistem özeti ve istatistikler</p>
+</div>
+
+<!-- İstatistikler -->
+<div class="row">
+    <div class="col-md-3">
+        <div class="stat-card purple">
+            <h2>{{ toplam_ogretmen }}</h2>
+            <p>Öğretmen</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card cyan">
+            <h2>{{ toplam_sinif }}</h2>
+            <p>Sınıf</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card green">
+            <h2>{{ toplam_ogrenci }}</h2>
+            <p>Öğrenci</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card orange">
+            <h2>{{ bugun_yoklamalar }}</h2>
+            <p>Bugünkü Yoklama</p>
+        </div>
+    </div>
+</div>
+
+<!-- Son Yoklamalar -->
+<div class="yoklama-table">
+    <h4>
+        <i class="ti ti-clock-hour-4 me-2"></i>Son Yoklamalar
+    </h4>
+    
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th style="font-size: 1.1rem;">Tarih</th>
+                    <th style="font-size: 1.1rem;">Öğretmen</th>
+                    <th style="font-size: 1.1rem;">Sınıf</th>
+                    <th style="font-size: 1.1rem;">Ders</th>
+                    <th style="font-size: 1.1rem;">İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for yoklama in son_yoklamalar %}
+                <tr>
+                    <td style="font-size: 1.1rem;">{{ yoklama.tarih|date:"d.m.Y" }}</td>
+                    <td style="font-size: 1.1rem;">{{ yoklama.ogretmen.get_full_name }}</td>
+                    <td><span class="badge bg-info" style="font-size: 1rem;">{{ yoklama.sinif.ad }}</span></td>
+                    <td style="font-size: 1.1rem;">{{ yoklama.ders_basligi|truncatewords:4 }}</td>
+                    <td>
+                        <a href="{% url 'yoklama_detay' yoklama.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="ti ti-eye me-1"></i>Detay
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endif %}
+
+{% endblock %}

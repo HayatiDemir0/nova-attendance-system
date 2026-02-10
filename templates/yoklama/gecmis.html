@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Yoklama Geçmişi - Yoklama Sistemi{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Yoklama Geçmişi</h2>
+
+    {# Filtreleme Alanı: Sadece Admin veya yetkili kullanıcılar görebilir #}
+    {% if user.role == 'admin' or user.is_staff %}
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="bi bi-filter"></i> Filtrele</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Öğretmen</label>
+                    <select name="ogretmen" class="form-select">
+                        <option value="">Tümü</option>
+                        {% for ogretmen in ogretmenler %}
+                        <option value="{{ ogretmen.id }}" {% if request.GET.ogretmen == ogretmen.id|stringformat:"i" %}selected{% endif %}>
+                            {{ ogretmen.get_full_name|default:ogretmen.username }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Sınıf</label>
+                    <select name="sinif" class="form-select">
+                        <option value="">Tümü</option>
+                        {% for sinif in siniflar %}
+                        <option value="{{ sinif.id }}" {% if request.GET.sinif == sinif.id|stringformat:"i" %}selected{% endif %}>
+                            {{ sinif.ad }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Tarih</label>
+                    <input type="date" name="tarih" class="form-control" value="{{ request.GET.tarih }}">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Listele
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    {# Yoklama Listesi Tablosu #}
+    <div class="card shadow-sm">
+        <div class="card-body">
+            {% if yoklamalar %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tarih</th>
+                            <th>Ders Başlığı</th>
+                            {% if user.role == 'admin' or user.is_staff %}
+                            <th>Öğretmen</th>
+                            {% endif %}
+                            <th>Sınıf</th>
+                            <th>Ders</th>
+                            <th class="text-center">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for yoklama in yoklamalar %}
+                        <tr>
+                            <td>
+                                <span class="text-nowrap">{{ yoklama.tarih|date:"d.m.Y" }}</span><br>
+                                <small class="text-muted">{{ yoklama.ders_programi.get_gun_display }}</small>
+                            </td>
+                            <td><strong>{{ yoklama.ders_basligi }}</strong></td>
+                            {% if user.role == 'admin' or user.is_staff %}
+                            <td>{{ yoklama.ogretmen.get_full_name|default:yoklama.ogretmen.username }}</td>
+                            {% endif %}
+                            <td><span class="badge bg-info text-dark">{{ yoklama.sinif.ad }}</span></td>
+                            <td>{{ yoklama.ders_programi.ders_adi }}</td>
+                            <td class="text-center">
+                                <a href="{% url 'yoklama_detay' yoklama.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> Detaylar
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-calendar-x display-1 text-muted"></i>
+                <p class="fs-5 mt-3 text-secondary">Aranan kriterlere uygun yoklama kaydı bulunamadı.</p>
+                <a href="{% url 'yoklama_gecmis' %}" class="btn btn-link">Filtreleri Temizle</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

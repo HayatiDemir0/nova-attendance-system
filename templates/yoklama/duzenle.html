@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}Yoklama Düzenle - Yoklama Sistemi{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>Yoklama Düzenle (Admin)</h2>
+            <p class="text-muted mb-0">
+                <strong>{{ yoklama.ders_programi.ders_adi }}</strong> - {{ yoklama.sinif.ad }} | 
+                {{ yoklama.tarih|date:"d.m.Y" }}
+            </p>
+        </div>
+        <a href="{% url 'yoklama_detay' yoklama.pk %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Geri
+        </a>
+    </div>
+
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <strong>Dikkat!</strong> Bu yoklama zaten alınmış. Değişiklikler kalıcı olacaktır.
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-4">
+                    <label class="form-label"><strong>Ders Konusu</strong></label>
+                    <input type="text" name="ders_basligi" class="form-control form-control-lg" 
+                           value="{{ yoklama.ders_basligi }}" required>
+                </div>
+                
+                <hr>
+                
+                <div class="mb-4">
+                    <label class="form-label"><strong>Hızlı İşaretle:</strong></label>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-success" onclick="tumunuIsaretle('var')">
+                            <i class="bi bi-check-all"></i> Tümü VAR
+                        </button>
+                        <button type="button" class="btn btn-outline-danger" onclick="tumunuIsaretle('yok')">
+                            <i class="bi bi-x-circle"></i> Tümü YOK
+                        </button>
+                        <button type="button" class="btn btn-outline-warning" onclick="tumunuIsaretle('izinli')">
+                            <i class="bi bi-hospital"></i> Tümü İZİNLİ
+                        </button>
+                    </div>
+                </div>
+                
+                <h5 class="mb-3">
+                    Öğrenci Listesi 
+                    <span class="badge bg-primary">{{ ogrenciler.count }} öğrenci</span>
+                </h5>
+                
+                <div class="row g-3">
+                    {% for ogrenci in ogrenciler %}
+                    {% with detay=yoklama_detaylari|get_item:ogrenci.id %}
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h6 class="card-title mb-3">
+                                    <span class="badge bg-secondary me-2">{{ forloop.counter }}</span>
+                                    {{ ogrenci.tam_ad }}
+                                </h6>
+                                
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <input type="radio" class="btn-check" 
+                                               name="durum_{{ ogrenci.id }}" 
+                                               value="var" 
+                                               id="var_{{ ogrenci.id }}"
+                                               {% if detay.durum == 'var' %}checked{% endif %}>
+                                        <label class="btn btn-outline-success w-100" for="var_{{ ogrenci.id }}">
+                                            <i class="bi bi-check-circle"></i> VAR
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="col-6">
+                                        <input type="radio" class="btn-check" 
+                                               name="durum_{{ ogrenci.id }}" 
+                                               value="yok" 
+                                               id="yok_{{ ogrenci.id }}"
+                                               {% if detay.durum == 'yok' %}checked{% endif %}>
+                                        <label class="btn btn-outline-danger w-100" for="yok_{{ ogrenci.id }}">
+                                            <i class="bi bi-x-circle"></i> YOK
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="col-6">
+                                        <input type="radio" class="btn-check" 
+                                               name="durum_{{ ogrenci.id }}" 
+                                               value="izinli" 
+                                               id="izinli_{{ ogrenci.id }}"
+                                               {% if detay.durum == 'izinli' %}checked{% endif %}>
+                                        <label class="btn btn-outline-warning w-100" for="izinli_{{ ogrenci.id }}">
+                                            <i class="bi bi-hospital"></i> İZİNLİ
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="col-6">
+                                        <input type="radio" class="btn-check" 
+                                               name="durum_{{ ogrenci.id }}" 
+                                               value="gec" 
+                                               id="gec_{{ ogrenci.id }}"
+                                               {% if detay.durum == 'gec' %}checked{% endif %}>
+                                        <label class="btn btn-outline-info w-100" for="gec_{{ ogrenci.id }}">
+                                            <i class="bi bi-clock"></i> GEÇ
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-2">
+                                    <input type="text" name="not_{{ ogrenci.id }}" 
+                                           class="form-control form-control-sm" 
+                                           value="{{ detay.not_durumu|default:'' }}" 
+                                           placeholder="Not (opsiyonel)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endwith %}
+                    {% endfor %}
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-warning btn-lg px-5">
+                        <i class="bi bi-pencil-fill"></i> Değişiklikleri Kaydet
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function tumunuIsaretle(durum) {
+    const radios = document.querySelectorAll('input[type="radio"][value="' + durum + '"]');
+    radios.forEach(radio => {
+        radio.checked = true;
+    });
+}
+</script>
+
+<style>
+.btn-check:checked + .btn-outline-success {
+    background-color: #198754;
+    color: white;
+}
+.btn-check:checked + .btn-outline-danger {
+    background-color: #dc3545;
+    color: white;
+}
+.btn-check:checked + .btn-outline-warning {
+    background-color: #ffc107;
+    color: black;
+}
+.btn-check:checked + .btn-outline-info {
+    background-color: #0dcaf0;
+    color: black;
+}
+</style>
+{% endblock %}

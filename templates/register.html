@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Kayıt Ol - Nova Akademi{% endblock %}
+
+{% block login_content %}
+<div class="card card-md">
+    <div class="card-body">
+        <h2 class="h2 text-center mb-4">Yeni Hesap Oluştur</h2>
+        
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Ad</label>
+                    <input type="text" name="first_name" class="form-control" placeholder="Adınız" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Soyad</label>
+                    <input type="text" name="last_name" class="form-control" placeholder="Soyadınız" required>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-control" placeholder="email@ornek.com">
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Kullanıcı Adı</label>
+                <input type="text" name="username" class="form-control" placeholder="Kullanıcı adı seçin" required>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Şifre</label>
+                <input type="password" name="password1" class="form-control" placeholder="Şifre oluşturun" required>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Şifre Tekrar</label>
+                <input type="password" name="password2" class="form-control" placeholder="Şifreyi tekrar girin" required>
+            </div>
+            
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            
+            <div class="form-footer">
+                <button type="submit" class="btn btn-primary w-100 btn-lg">
+                    <i class="ti ti-user-plus me-2"></i>Kayıt Ol
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="text-center text-muted mt-3">
+    Zaten hesabınız var mı? <a href="{% url 'login' %}" class="text-decoration-none">Giriş Yap</a>
+</div>
+
+<div class="text-center mt-4">
+    <small class="text-muted">© 2026 Nova IT Academy - Tüm hakları saklıdır.</small>
+</div>
+{% endblock %}

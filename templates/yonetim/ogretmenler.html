@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+
+{% block title %}Öğretmen Yönetimi - Admin Paneli{% endblock %}
+
+{% block content %}
+
+<style>
+    .page-header-section {
+        background: linear-gradient(135deg, #7B3F9D 0%, #E91E63 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 5px 20px rgba(123, 63, 157, 0.3);
+    }
+    
+    .search-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+    }
+    
+    .table-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+    }
+    
+    .table-card .card-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-bottom: 2px solid #7B3F9D;
+        padding: 1.5rem;
+    }
+    
+    .table thead th {
+        background: #f8f9fa;
+        color: #333;
+        font-weight: 600;
+        border: none;
+        padding: 1rem;
+    }
+    
+    .table tbody tr {
+        transition: all 0.3s;
+    }
+    
+    .table tbody tr:hover {
+        background: #f8f9fa;
+        transform: translateX(5px);
+    }
+    
+    .btn-action {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 5rem;
+        opacity: 0.3;
+        margin-bottom: 1.5rem;
+    }
+</style>
+
+<!-- Başlık -->
+<div class="page-header-section">
+    <div class="row align-items-center">
+        <div class="col">
+            <h1 class="mb-0">
+                <i class="ti ti-users me-3"></i>Öğretmen Yönetimi
+            </h1>
+            <p class="mb-0 mt-2 opacity-75">Sistemdeki tüm öğretmenleri yönetin</p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'ogretmen_ekle' %}" class="btn btn-light btn-lg">
+                <i class="ti ti-plus me-2"></i>Yeni Öğretmen Ekle
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Arama Kartı -->
+<div class="search-card">
+    <form method="get">
+        <div class="row g-3">
+            <div class="col-md-10">
+                <input type="text" name="q" class="form-control form-control-lg" 
+                       placeholder="Öğretmen ara (ad, soyad, email)..." 
+                       value="{{ q|default:'' }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary btn-lg w-100">
+                    <i class="ti ti-search me-2"></i>Ara
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Öğretmen Listesi -->
+<div class="table-card">
+    <div class="card-header">
+        <h3 class="mb-0">
+            <i class="ti ti-list me-2"></i>Toplam {{ ogretmenler.count }} Öğretmen
+        </h3>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th style="width: 50px;">#</th>
+                    <th>Ad Soyad</th>
+                    <th>Email</th>
+                    <th>Telefon</th>
+                    <th>Kayıt Tarihi</th>
+                    <th style="width: 200px;">İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ogretmen in ogretmenler %}
+                <tr>
+                    <td>
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                             style="width: 35px; height: 35px; font-weight: bold;">
+                            {{ forloop.counter }}
+                        </div>
+                    </td>
+                    <td>
+                        <strong style="font-size: 1.05rem;">{{ ogretmen.get_full_name }}</strong>
+                    </td>
+                    <td>
+                        {% if ogretmen.email %}
+                            <i class="ti ti-mail me-1 text-muted"></i>{{ ogretmen.email }}
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if ogretmen.telefon %}
+                            <i class="ti ti-phone me-1 text-muted"></i>{{ ogretmen.telefon }}
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ ogretmen.date_joined|date:"d.m.Y" }}</td>
+                    <td>
+                        <a href="{% url 'ogretmen_duzenle' ogretmen.id %}" 
+                           class="btn btn-sm btn-outline-primary btn-action">
+                            <i class="ti ti-edit"></i> Düzenle
+                        </a>
+                        <a href="{% url 'ogretmen_sil' ogretmen.id %}" 
+                           class="btn btn-sm btn-outline-danger btn-action"
+                           onclick="return confirm('{{ ogretmen.get_full_name }} öğretmenini silmek istediğinize emin misiniz?')">
+                            <i class="ti ti-trash"></i> Sil
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="border-0">
+                        <div class="empty-state">
+                            <i class="ti ti-users"></i>
+                            <h4>Henüz öğretmen eklenmemiş</h4>
+                            <p class="text-muted">İlk öğretmeni eklemek için yukarıdaki butona tıklayın.</p>
+                            <a href="{% url 'ogretmen_ekle' %}" class="btn btn-primary btn-lg mt-3">
+                                <i class="ti ti-plus me-2"></i>İlk Öğretmeni Ekle
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Geri Dön Butonu -->
+<div class="mt-4">
+    <a href="{% url 'yonetim_panel' %}" class="btn btn-outline-secondary btn-lg">
+        <i class="ti ti-arrow-left me-2"></i>Admin Paneline Dön
+    </a>
+</div>
+
+{% endblock %}

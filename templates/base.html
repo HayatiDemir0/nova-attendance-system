@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Nova Akademi - Yoklama Sistemi{% endblock %}</title>
+
+    <!-- Tabler CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --nova-purple: #7B3F9D;
+            --nova-pink: #E91E63;
+            --nova-cyan: #00BCD4;
+        }
+
+        body {
+            font-size: 16px;
+        }
+
+        .navbar-nav .nav-link {
+            font-size: 15px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+        }
+
+        h2 {
+            font-size: 2rem;
+        }
+
+        h3 {
+            font-size: 1.75rem;
+        }
+
+        .table {
+            font-size: 15px;
+        }
+
+        .btn {
+            font-size: 15px;
+            padding: 0.6rem 1.2rem;
+        }
+
+        .form-control,
+        .form-label {
+            font-size: 15px;
+        }
+
+        .navbar-vertical {
+            background: linear-gradient(135deg, var(--nova-purple) 0%, var(--nova-pink) 100%);
+        }
+
+        .navbar-vertical .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            transition: all 0.3s;
+        }
+
+        .navbar-vertical .navbar-nav .nav-link:hover,
+        .navbar-vertical .navbar-nav .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+
+        .navbar-vertical .navbar-nav .nav-link i {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .navbar-vertical .navbar-nav .nav-link:hover i,
+        .navbar-vertical .navbar-nav .nav-link.active i {
+            color: #fff;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--nova-purple), var(--nova-pink));
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--nova-pink), var(--nova-purple));
+        }
+
+        .card {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            border: none;
+        }
+
+        .user-info-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: auto;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* AÇILIR MENÜ */
+        .submenu {
+            display: none;
+            padding-left: 2rem;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .submenu.show {
+            display: block;
+        }
+
+        .submenu .nav-link {
+            font-size: 14px;
+            padding: 10px 15px;
+        }
+
+        .nav-link.dropdown-toggle::after {
+            content: "›";
+            float: right;
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .nav-link.dropdown-toggle.active::after {
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        {% if user.is_authenticated %}
+
+        <!-- Sidebar -->
+        <aside class="navbar navbar-vertical navbar-expand-lg">
+            <div class="container-fluid">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Logo -->
+                <h1 class="navbar-brand">
+                    <a href="{% url 'dashboard' %}">
+                        <span style="color: white; font-size: 1.5rem; font-weight: bold;">
+                            NOVA <span style="color: #00BCD4;">IT ACADEMY</span>
+                        </span>
+                    </a>
+                </h1>
+
+                <div class="collapse navbar-collapse" id="sidebar-menu">
+                    <ul class="navbar-nav pt-lg-3">
+                        <!-- ANASAYFA -->
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}"
+                                href="{% url 'dashboard' %}">
+                                <span class="nav-link-icon d-lg-inline-block">
+                                    <i class="ti ti-home"></i>
+                                </span>
+                                <span class="nav-link-title">Anasayfa</span>
+                            </a>
+                        </li>
+
+                        {% if user.role == 'admin' %}
+                        <!-- ADMİN PANELİ - AÇILIR MENÜ -->
+                        <li class="nav-item">
+                            <a class="nav-link dropdown-toggle {% if 'admin-panel' in request.path %}active{% endif %}"
+                                href="#" onclick="toggleSubmenu(event)">
+                                <span class="nav-link-icon d-lg-inline-block">
+                                    <i class="ti ti-dashboard"></i>
+                                </span>
+                                <span class="nav-link-title">Admin Paneli</span>
+                            </a>
+
+                            <!-- ALT MENÜ -->
+                            <ul class="submenu {% if 'admin-panel' in request.path %}show{% endif %}">
+                                <li class="nav-item">
+                                    <a class="nav-link {% if request.path == '/admin-panel/' %}active{% endif %}"
+                                        href="{% url 'yonetim_panel' %}">
+                                        <i class="ti ti-home me-2"></i>Ana Sayfa
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if 'admin-panel/ogretmenler' in request.path %}active{% endif %}"
+                                        href="{% url 'yonetim_ogretmenler' %}">
+                                        <i class="ti ti-users me-2"></i>Öğretmenler
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if 'admin-panel/siniflar' in request.path %}active{% endif %}"
+                                        href="{% url 'yonetim_siniflar' %}">
+                                        <i class="ti ti-door me-2"></i>Sınıflar
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if 'admin-panel/ogrenciler' in request.path %}active{% endif %}"
+                                        href="{% url 'yonetim_ogrenciler' %}">
+                                        <i class="ti ti-user me-2"></i>Öğrenciler
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if 'admin-panel/ders-programi' in request.path %}active{% endif %}"
+                                        href="{% url 'yonetim_ders_programi' %}">
+                                        <i class="ti ti-calendar-event me-2"></i>Ders Programı
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if 'admin-panel/yoklamalar' in request.path %}active{% endif %}"
+                                        href="{% url 'yonetim_yoklamalar' %}">
+                                        <i class="ti ti-clipboard-check me-2"></i>Yoklamalar
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link {% if 'admin-panel/ayarlar' in request.path %}active{% endif %}"
+                                        href="{% url 'yonetim_ayarlar' %}">
+                                        <i class="ti ti-settings me-2"></i>Ayarlar
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        {% endif %}
+
+                        <!-- YOKLAMALAR -->
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'yoklama' in request.path and 'admin-panel' not in request.path %}active{% endif %}"
+                                href="{% url 'yoklama_gecmis' %}">
+                                <span class="nav-link-icon d-lg-inline-block">
+                                    <i class="ti ti-clipboard-check"></i>
+                                </span>
+                                <span class="nav-link-title">Yoklamalar</span>
+                            </a>
+                        </li>
+
+                        <!-- TAKVİM -->
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'takvim' in request.path %}active{% endif %}"
+                                href="{% url 'takvim' %}">
+                                <span class="nav-link-icon d-lg-inline-block">
+                                    <i class="ti ti-calendar"></i>
+                                </span>
+                                <span class="nav-link-title">Takvim</span>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Kullanıcı Bilgisi -->
+                    <div class="user-info-card mt-auto mb-3 mx-3">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-fill">
+                                <div class="font-weight-medium">{{ user.get_full_name|default:user.username }}</div>
+                                <div class="text-muted small">{{ user.get_role_display }}</div>
+                            </div>
+                        </div>
+                        <a href="{% url 'logout' %}" class="btn btn-light w-100 mt-2">
+                            <i class="ti ti-logout me-2"></i>Çıkış Yap
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="page-wrapper">
+            <div class="page-body">
+                <div class="container-xl">
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert">
+                        <div class="d-flex">
+                            <div>{{ message }}</div>
+                        </div>
+                        <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+
+        <!-- Login Sayfası İçin Container -->
+        <div class="page page-center">
+            <div class="container container-tight py-4">
+                <div class="text-center mb-4">
+                    <h1 style="color: #7B3F9D;">NOVA <span style="color: #00BCD4;">IT ACADEMY</span></h1>
+                </div>
+                {% block login_content %}{% endblock %}
+            </div>
+        </div>
+
+        {% endif %}
+    </div>
+
+    <!-- Tabler JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
+
+    <!-- Açılır Menü JS -->
+    <script>
+        function toggleSubmenu(event) {
+            event.preventDefault();
+            const link = event.currentTarget;
+            const submenu = link.nextElementSibling;
+
+            // Toggle submenu
+            submenu.classList.toggle('show');
+            link.classList.toggle('active');
+        }
+    </script>
+</body>
+
+</html>

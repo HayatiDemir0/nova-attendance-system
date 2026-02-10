@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Giriş Yap - Nova Akademi{% endblock %}
+
+{% block login_content %}
+<div class="card card-md">
+    <div class="card-body">
+        <h2 class="h2 text-center mb-4">Yoklama Sistemine Giriş</h2>
+        
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label class="form-label">Kullanıcı Adı</label>
+                <input type="text" name="username" class="form-control" placeholder="Kullanıcı adınızı girin" required autofocus>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Şifre</label>
+                <input type="password" name="password" class="form-control" placeholder="Şifrenizi girin" required>
+            </div>
+            
+            {% if form.errors %}
+            <div class="alert alert-danger" role="alert">
+                <div class="d-flex">
+                    <div>
+                        <i class="ti ti-alert-circle me-2"></i>
+                        Kullanıcı adı veya şifre hatalı!
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="form-footer">
+                <button type="submit" class="btn btn-primary w-100 btn-lg">
+                    <i class="ti ti-login me-2"></i>Giriş Yap
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="text-center mt-4">
+    <small class="text-muted">© 2026 Nova IT Academy - Tüm hakları saklıdır.</small>
+</div>
+{% endblock %}

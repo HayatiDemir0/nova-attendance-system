@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Sınıf Yönetimi - Admin Paneli{% endblock %}
+
+{% block content %}
+
+<style>
+    .page-header-section {
+        background: linear-gradient(135deg, #00BCD4 0%, #00ACC1 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 5px 20px rgba(0, 188, 212, 0.3);
+    }
+    
+    .sinif-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        transition: all 0.3s;
+        border-left: 5px solid #7B3F9D;
+        height: 100%;
+    }
+    
+    .sinif-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 30px rgba(123, 63, 157, 0.2);
+    }
+    
+    .sinif-card .card-body {
+        padding: 2rem;
+    }
+    
+    .sinif-card .card-title {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #7B3F9D;
+        margin-bottom: 1rem;
+    }
+    
+    .sinif-card .badge {
+        font-size: 1.1rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 5rem 2rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+    }
+    
+    .empty-state i {
+        font-size: 6rem;
+        opacity: 0.3;
+        margin-bottom: 2rem;
+        color: #00BCD4;
+    }
+</style>
+
+<!-- Başlık -->
+<div class="page-header-section">
+    <div class="row align-items-center">
+        <div class="col">
+            <h1 class="mb-0">
+                <i class="ti ti-door me-3"></i>Sınıf Yönetimi
+            </h1>
+            <p class="mb-0 mt-2 opacity-75">Tüm sınıfları görüntüleyin ve yönetin</p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'sinif_ekle' %}" class="btn btn-light btn-lg">
+                <i class="ti ti-plus me-2"></i>Yeni Sınıf Ekle
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Sınıf Kartları -->
+{% if siniflar %}
+<div class="row">
+    {% for sinif in siniflar %}
+    <div class="col-md-4 mb-4">
+        <div class="sinif-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h3 class="card-title mb-0">{{ sinif.ad }}</h3>
+                    <span class="badge bg-primary">
+                        {{ sinif.ogrenci_sayisi }} Öğrenci
+                    </span>
+                </div>
+                
+                <p class="text-muted mb-4" style="font-size: 1rem;">
+                    {% if sinif.aciklama %}
+                        {{ sinif.aciklama|truncatewords:20 }}
+                    {% else %}
+                        <em>Açıklama eklenmemiş.</em>
+                    {% endif %}
+                </p>
+                
+                <div class="d-grid gap-2">
+                    <a href="{% url 'sinif_duzenle' sinif.id %}" 
+                       class="btn btn-outline-primary">
+                        <i class="ti ti-edit me-2"></i>Düzenle
+                    </a>
+                    <a href="{% url 'yonetim_ogrenciler' %}?sinif={{ sinif.id }}" 
+                       class="btn btn-outline-info">
+                        <i class="ti ti-users me-2"></i>Öğrencileri Gör ({{ sinif.ogrenci_sayisi }})
+                    </a>
+                    <a href="{% url 'sinif_sil' sinif.id %}" 
+                       class="btn btn-outline-danger"
+                       onclick="return confirm('{{ sinif.ad }} sınıfını silmek istediğinize emin misiniz?\n\nBu işlem geri alınamaz!')">
+                        <i class="ti ti-trash me-2"></i>Sil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<!-- Boş Durum -->
+<div class="empty-state">
+    <i class="ti ti-door"></i>
+    <h2>Henüz sınıf eklenmemiş</h2>
+    <p class="text-muted fs-5">İlk sınıfı oluşturmak için yukarıdaki butona tıklayın.</p>
+    <a href="{% url 'sinif_ekle' %}" class="btn btn-primary btn-lg mt-4">
+        <i class="ti ti-plus me-2"></i>İlk Sınıfı Oluştur
+    </a>
+</div>
+{% endif %}
+
+<!-- Geri Dön Butonu -->
+<div class="mt-4">
+    <a href="{% url 'yonetim_panel' %}" class="btn btn-outline-secondary btn-lg">
+        <i class="ti ti-arrow-left me-2"></i>Admin Paneline Dön
+    </a>
+</div>
+
+{% endblock %}
