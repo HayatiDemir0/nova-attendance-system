@@ -4,14 +4,14 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import User  # Kendi User modelin
 
-# --- YÖNETİCİ KONTROLÜ (Admin yoksa oluşturur) ---
+# --- YÖNETİCİ KONTROLÜ ---
 def admin_kontrol():
     if not User.objects.filter(username='admin').exists():
         User.objects.create_superuser('admin', 'admin@example.com', '123456')
 
 # --- GİRİŞ SAYFASI ---
 def login_view(request):
-    admin_kontrol() # Her girişte admini kontrol eder
+    admin_kontrol()
     if request.user.is_authenticated:
         return redirect('dashboard')
         
@@ -21,6 +21,9 @@ def login_view(request):
         user = authenticate(request, username=u, password=p)
         if user is not None:
             login(request, user)
+            # Giriş yapar yapmaz kontrol et: Adminse direkt panele!
+            if user.username == 'admin':
+                return redirect('yonetim_panel')
             return redirect('dashboard')
         else:
             messages.error(request, "Kullanıcı adı veya şifre hatalı!")
@@ -30,26 +33,22 @@ def login_view(request):
 # --- TRAFİK POLİSİ (Dashboard) ---
 @login_required
 def dashboard(request):
-    # Eğer giriş yapan kişi süper adminse veya rolü adminse
-    if request.user.is_superuser or getattr(request.user, 'role', '') == 'admin':
+    # İsimden yakalama (En garanti yöntem)
+    if request.user.username == 'admin' or request.user.is_superuser:
         return redirect('yonetim_panel')
     
-    # Değilse (Öğretmense) normal dashboard'a gider
+    # Öğretmense buraya düşer
     return render(request, 'core/dashboard.html')
 
 # --- SENİN ÖZEL ADMİN PANELİN ---
 @login_required
 def yonetim_panel(request):
-    if not request.user.is_superuser and getattr(request.user, 'role', '') != 'admin':
+    # Eğer admin olmayan biri sızmaya çalışırsa kov
+    if not request.user.is_superuser and request.user.username != 'admin':
         return redirect('dashboard')
         
-    # Burada senin hazırladığın o yakışıklı admin HTML'i olmalı
+    # Kendi HTML dosyanın ismi core/ içinde neyse onu yaz (Örn: admin_panel.html)
     return render(request, 'core/admin_panel.html') 
-
-# --- DİĞER ADMİN SAYFALARI (Boş kalmasın diye) ---
-@login_required
-def yonetim_ogretmenler(request):
-    return render(request, 'core/yonetim_ogretmenler.html')
 
 # --- ÇIKIŞ ---
 def logout_view(request):
