@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Not Ekle - {{ ogrenci.tam_ad }}{% endblock %}
+{% block content %}
+
+<div class="page-header-section" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+    <h1><i class="ti ti-plus me-3"></i>Not Ekle - {{ ogrenci.tam_ad }}</h1>
+    <p class="mb-0">{{ ogrenci.sinif.ad }}</p>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Kategori <span class="text-danger">*</span></label>
+                    <select name="kategori" class="form-select" required>
+                        <option value="genel">Genel Not</option>
+                        <option value="tatil">Tatil/İzin</option>
+                        <option value="disiplin">Disiplin</option>
+                        <option value="saglik">Sağlık</option>
+                        <option value="basari">Başarı/Ödül</option>
+                    </select>
+                    <div class="form-text">
+                        Not türünü seçin
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Tarih <span class="text-danger">*</span></label>
+                    <input type="date" name="tarih" class="form-control" value="{{ bugun|date:'Y-m-d' }}" required>
+                    <div class="form-text">
+                        Olayın gerçekleştiği tarih
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Başlık <span class="text-danger">*</span></label>
+                <input type="text" name="baslik" class="form-control" placeholder="Örn: 12 Şubat - 20 Şubat arası tatil" required minlength="3" maxlength="100">
+                <div class="form-text">En az 3 karakter</div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Açıklama <span class="text-danger">*</span></label>
+                <textarea name="aciklama" class="form-control" rows="5" placeholder="Detaylı açıklama yazın..." required minlength="10" maxlength="1000"></textarea>
+                <div class="form-text">En az 10 karakter</div>
+            </div>
+            
+            <div class="alert alert-info">
+                <i class="ti ti-info-circle me-2"></i>
+                <strong>Not:</strong> Bu bilgiler öğrenci geçmişinde kaydedilecektir.
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="ti ti-check me-2"></i>Kaydet
+                </button>
+                <a href="{% url 'ogrenci_detay' ogrenci.id %}" class="btn btn-outline-secondary btn-lg">
+                    <i class="ti ti-x me-2"></i>İptal
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

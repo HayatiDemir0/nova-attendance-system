@@ -4,6 +4,8 @@ from django.contrib import messages
 from django.utils import timezone
 from .models import User, Sinif, Ogrenci, DersProgrami, Yoklama
 from django.db.models import Q, Count
+from django.shortcuts import get_object_or_404
+from .models import OgrenciNotu
 
 # ==================== ADMİN PANELİ ====================
 
@@ -214,3 +216,115 @@ def yonetim_ayarlar(request):
         'en_eski_yoklama': Yoklama.objects.order_by('tarih').first(),
     }
     return render(request, 'yonetim/ayarlar.html', context)
+@login_required
+def ogrenci_detay(request, pk):
+    """Öğrenci Detay ve Notlar"""
+    if request.user.role != 'admin':
+        messages.error(request, 'Bu sayfaya erişim yetkiniz yok!')
+        return redirect('dashboard')
+    
+    ogrenci = get_object_or_404(Ogrenci, pk=pk)
+    notlar = ogrenci.notlar.all()
+    
+    context = {
+        'ogrenci': ogrenci,
+        'notlar': notlar,
+    }
+    return render(request, 'yonetim/ogrenci_detay.html', context)
+
+
+@login_required
+def ogrenci_not_ekle(request, pk):
+    """Öğrenciye Not Ekle"""
+    if request.user.role != 'admin':
+        messages.error(request, 'Bu sayfaya erişim yetkiniz yok!')
+        return redirect('dashboard')
+    
+    ogrenci = get_object_or_404(Ogrenci, pk=pk)
+    
+    if request.method == 'POST':
+        kategori = request.POST.get('kategori')
+        baslik = request.POST.get('baslik', '').strip()
+        aciklama = request.POST.get('aciklama', '').strip()
+        tarih = request.POST.get('tarih')
+        
+        # Validasyon
+        if not baslik:
+            messages.error(request, 'Başlık boş bırakılamaz!')
+            return redirect('ogrenci_not_ekle', pk=pk)
+        
+        if len(baslik) < 3:
+            messages.error(request, 'Başlık en az 3 karakter olmalıdır!')
+            return redirect('ogrenci_not_ekle', pk=pk)
+        
+        if not aciklama:
+            messages.error(request, 'Açıklama boş bırakılamaz!')
+            return redirect('ogrenci_not_ekle', pk=pk)
+        
+        if len(aciklama) < 10:
+            messages.error(request, 'Açıklama en az 10 karakter olmalıdır!')
+            return redirect('ogrenci_not_ekle', pk=pk)
+        
+        if not tarih:
+            messages.error(request, 'Tarih seçilmelidir!')
+            return redirect('ogrenci_not_ekle', pk=pk)
+        
+        # Not oluştur
+        OgrenciNotu.objects.create(
+            ogrenci=ogrenci,
+            olusturan=request.user,
+            kategori=kategori,
+            baslik=baslik,
+            aciklama=aciklama,
+            tarih=tarih
+        )
+        
+        messages.success(request, f'{ogrenci.tam_ad} için not eklendi!')
+        return redirect('ogrenci_detay', pk=pk)
+    
+    context = {
+        'ogrenci': ogrenci,
+        'bugun': timezone.now().date(),
+    }
+    return render(request, 'yonetim/ogrenci_not_ekle.html', context)
+
+
+@login_required
+def ogrenci_not_duzenle(request, pk):
+    """Not Düzenle"""
+    if request.user.role != 'admin':
+        messages.error(request, 'Bu sayfaya erişim yetkiniz yok!')
+        return redirect('dashboard')
+    
+    ogrenci_notu = get_object_or_404(OgrenciNotu, pk=pk)  # ← DEĞİŞTİ
+    
+    if request.method == 'POST':
+        ogrenci_notu.kategori = request.POST.get('kategori')  # ← DEĞİŞTİ
+        ogrenci_notu.baslik = request.POST.get('baslik', '').strip()
+        ogrenci_notu.aciklama = request.POST.get('aciklama', '').strip()
+        ogrenci_notu.tarih = request.POST.get('tarih')
+        ogrenci_notu.save()
+        
+        messages.success(request, 'Not güncellendi!')
+        return redirect('ogrenci_detay', pk=ogrenci_notu.ogrenci.id)  # ← DEĞİŞTİ
+    
+    context = {
+        'ogrenci_notu': ogrenci_notu,  # ← DEĞİŞTİ
+        'ogrenci': ogrenci_notu.ogrenci,  # ← DEĞİŞTİ
+    }
+    return render(request, 'yonetim/ogrenci_not_duzenle.html', context)
+
+
+@login_required
+def ogrenci_not_sil(request, pk):
+    """Not Sil"""
+    if request.user.role != 'admin':
+        messages.error(request, 'Bu sayfaya erişim yetkiniz yok!')
+        return redirect('dashboard')
+    
+    ogrenci_notu = get_object_or_404(OgrenciNotu, pk=pk)  # ← DEĞİŞTİ
+    ogrenci_id = ogrenci_notu.ogrenci.id  # ← DEĞİŞTİ
+    ogrenci_notu.delete()  # ← DEĞİŞTİ
+    
+    messages.success(request, 'Not silindi!')
+    return redirect('ogrenci_detay', pk=ogrenci_id)

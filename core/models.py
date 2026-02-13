@@ -20,6 +20,7 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.get_full_name() or self.username}"
 
+
 class Sinif(models.Model):
     ad = models.CharField(max_length=50, unique=True)
     aciklama = models.TextField(blank=True)
@@ -33,6 +34,7 @@ class Sinif(models.Model):
     
     def __str__(self):
         return self.ad
+
 
 class Ogrenci(models.Model):
     CINSIYET_CHOICES = (
@@ -48,8 +50,9 @@ class Ogrenci(models.Model):
     sinif = models.ForeignKey(Sinif, on_delete=models.CASCADE, related_name='ogrenciler')
     veli_adi = models.CharField(max_length=100)
     veli_telefon = models.CharField(max_length=15)
+    veli_email = models.EmailField(blank=True, null=True)
     adres = models.TextField(blank=True)
-    profil_resmi = models.ImageField(upload_to='ogrenci_resimleri/', blank=True, null=True)
+    fotograf = models.ImageField(upload_to='ogrenci_resimleri/', blank=True, null=True)
     kayit_tarihi = models.DateTimeField(auto_now_add=True)
     aktif = models.BooleanField(default=True)
     
@@ -66,6 +69,7 @@ class Ogrenci(models.Model):
     def tam_ad(self):
         return f"{self.ad} {self.soyad}"
 
+
 class DersProgrami(models.Model):
     GUNLER = (
         (1, 'Pazartesi'),
@@ -73,6 +77,7 @@ class DersProgrami(models.Model):
         (3, 'Çarşamba'),
         (4, 'Perşembe'),
         (5, 'Cuma'),
+        (6, 'Cumartesi'),
         (7, 'Pazar'),
     )
     
@@ -82,6 +87,7 @@ class DersProgrami(models.Model):
     gun = models.IntegerField(choices=GUNLER)
     baslangic_saati = models.TimeField()
     bitis_saati = models.TimeField()
+    derslik = models.CharField(max_length=50, blank=True, null=True)
     aktif = models.BooleanField(default=True)
     
     class Meta:
@@ -93,6 +99,7 @@ class DersProgrami(models.Model):
     
     def __str__(self):
         return f"{self.ders_adi} - {self.sinif.ad} - {self.get_gun_display()}"
+
 
 class Yoklama(models.Model):
     ders_programi = models.ForeignKey(DersProgrami, on_delete=models.CASCADE, related_name='yoklamalar')
@@ -111,6 +118,7 @@ class Yoklama(models.Model):
     
     def __str__(self):
         return f"{self.ders_basligi} - {self.tarih}"
+
 
 class YoklamaDetay(models.Model):
     DURUM_CHOICES = (
@@ -133,3 +141,54 @@ class YoklamaDetay(models.Model):
     
     def __str__(self):
         return f"{self.ogrenci.tam_ad} - {self.durum}"
+
+class OgrenciNotu(models.Model):
+    """Öğrenci Notları ve Yorumlar"""
+    
+    KATEGORI_CHOICES = [
+        ('tatil', 'Tatil/İzin'),
+        ('disiplin', 'Disiplin'),
+        ('saglik', 'Sağlık'),
+        ('basari', 'Başarı/Ödül'),
+        ('genel', 'Genel Not'),
+    ]
+    
+    ogrenci = models.ForeignKey(Ogrenci, on_delete=models.CASCADE, related_name='notlar')
+    olusturan = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    kategori = models.CharField(max_length=20, choices=KATEGORI_CHOICES, default='genel')
+    baslik = models.CharField(max_length=100)
+    aciklama = models.TextField()
+    tarih = models.DateField()
+    olusturma_zamani = models.DateTimeField(auto_now_add=True)
+    guncelleme_zamani = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'ogrenci_notlari'
+        ordering = ['-tarih', '-olusturma_zamani']
+        verbose_name = 'Öğrenci Notu'
+        verbose_name_plural = 'Öğrenci Notları'
+    
+    def __str__(self):
+        return f"{self.ogrenci.tam_ad} - {self.baslik} ({self.tarih})"
+    
+    def get_kategori_icon(self):
+        """Kategori ikonu"""
+        icons = {
+            'tatil': 'ti-beach',
+            'disiplin': 'ti-alert-triangle',
+            'saglik': 'ti-heartbeat',
+            'basari': 'ti-trophy',
+            'genel': 'ti-note',
+        }
+        return icons.get(self.kategori, 'ti-note')
+    
+    def get_kategori_color(self):
+        """Kategori rengi"""
+        colors = {
+            'tatil': 'info',
+            'disiplin': 'danger',
+            'saglik': 'warning',
+            'basari': 'success',
+            'genel': 'secondary',
+        }
+        return colors.get(self.kategori, 'secondary')

@@ -34,6 +34,10 @@ urlpatterns = [
     path('ogrenciler/ekle/', views.ogrenci_ekle, name='ogrenci_ekle'),
     path('ogrenciler/<int:pk>/duzenle/', views.ogrenci_duzenle, name='ogrenci_duzenle'),
     path('ogrenciler/<int:pk>/sil/', views.ogrenci_sil, name='ogrenci_sil'),
+    path('ogrenciler/<int:pk>/detay/', views.ogrenci_detay, name='ogrenci_detay'),
+    path('ogrenciler/<int:pk>/not-ekle/', views.ogrenci_not_ekle, name='ogrenci_not_ekle'),
+    path('ogrenci-notu/<int:pk>/duzenle/', views.ogrenci_not_duzenle, name='ogrenci_not_duzenle'),
+    path('ogrenci-notu/<int:pk>/sil/', views.ogrenci_not_sil, name='ogrenci_not_sil'),
     
     # Ders Programı
     path('ders-programi/', views.ders_programi_listesi, name='ders_programi_listesi'),

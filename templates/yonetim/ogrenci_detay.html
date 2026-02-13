@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% block title %}{{ ogrenci.tam_ad }} - Detay{% endblock %}
+{% block content %}
+<style>
+    .not-card-tatil {
+        border-left: 4px solid #17a2b8;
+    }
+
+    .not-card-disiplin {
+        border-left: 4px solid #dc3545;
+    }
+
+    .not-card-saglik {
+        border-left: 4px solid #ffc107;
+    }
+
+    .not-card-basari {
+        border-left: 4px solid #28a745;
+    }
+
+    .not-card-genel {
+        border-left: 4px solid #6c757d;
+    }
+</style>
+
+<div class="page-header-section"
+    style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+    <div class="row align-items-center">
+        <div class="col">
+            <h1><i class="ti ti-user me-3"></i>{{ ogrenci.tam_ad }}</h1>
+            <p class="mb-0">{{ ogrenci.sinif.ad }} - {{ ogrenci.tc_kimlik }}</p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'ogrenci_not_ekle' ogrenci.id %}" class="btn btn-light btn-lg">
+                <i class="ti ti-plus me-2"></i>Not Ekle
+            </a>
+            <a href="{% url 'yonetim_ogrenciler' %}" class="btn btn-outline-light btn-lg">
+                <i class="ti ti-arrow-left me-2"></i>Geri
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Öğrenci Bilgileri -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="ti ti-info-circle me-2"></i>Genel Bilgiler</h3>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <th>Ad Soyad:</th>
+                        <td>{{ ogrenci.tam_ad }}</td>
+                    </tr>
+                    <tr>
+                        <th>TC Kimlik:</th>
+                        <td>{{ ogrenci.tc_kimlik }}</td>
+                    </tr>
+                    <tr>
+                        <th>Sınıf:</th>
+                        <td><span class="badge bg-info">{{ ogrenci.sinif.ad }}</span></td>
+                    </tr>
+                    <tr>
+                        <th>Doğum Tarihi:</th>
+                        <td>{{ ogrenci.dogum_tarihi|date:"d.m.Y" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Durum:</th>
+                        <td>
+                            {% if ogrenci.aktif %}
+                            <span class="badge bg-success">Aktif</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Pasif</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="ti ti-users me-2"></i>Veli Bilgileri</h3>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <th>Veli Adı:</th>
+                        <td>{{ ogrenci.veli_adi|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Telefon:</th>
+                        <td>
+                            {% if ogrenci.veli_telefon %}
+                            {{ ogrenci.veli_telefon }}
+                            <a href="https://wa.me/90{{ ogrenci.veli_telefon|slice:'1:' }}"
+                                class="btn btn-sm btn-success ms-2" target="_blank">
+                                <i class="ti ti-brand-whatsapp"></i>
+                            </a>
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Email:</th>
+                        <td>{{ ogrenci.veli_email|default:"-" }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notlar -->
+<!-- Notlar -->
+<div class="card">
+    <div class="card-header" style="background: #f8f9fa; border-bottom: 2px solid #4CAF50;">
+        <h3><i class="ti ti-notes me-2"></i>Öğrenci Notları ({{ notlar.count }})</h3>
+    </div>
+    <!-- Notlar -->
+    <div class="card">
+        <div class="card-header" style="background: #f8f9fa; border-bottom: 2px solid #4CAF50;">
+            <h3><i class="ti ti-notes me-2"></i>Öğrenci Notları ({{ notlar.count }})</h3>
+        </div>
+        <div class="card-body">
+            {% if notlar %}
+            {% for ogrenci_notu in notlar %}
+            <div class="card mb-3 not-card-{{ ogrenci_notu.kategori }}">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <div class="d-flex align-items-start mb-2">
+                                <i class="{{ ogrenci_notu.get_kategori_icon }} text-{{ ogrenci_notu.get_kategori_color }} me-3"
+                                    style="font-size: 2rem;"></i>
+                                <div>
+                                    <h4 class="mb-1">{{ ogrenci_notu.baslik }}</h4>
+                                    <span class="badge bg-{{ ogrenci_notu.get_kategori_color }}">{{
+                                        ogrenci_notu.get_kategori_display }}</span>
+                                    <span class="badge bg-secondary ms-2">{{ ogrenci_notu.tarih|date:"d F Y" }}</span>
+                                </div>
+                            </div>
+                            <p class="mb-2" style="white-space: pre-wrap;">{{ ogrenci_notu.aciklama }}</p>
+                            <small class="text-muted">
+                                <i class="ti ti-user me-1"></i>{{ ogrenci_notu.olusturan.get_full_name }}
+                                <i class="ti ti-clock ms-3 me-1"></i>{{ ogrenci_notu.olusturma_zamani|date:"d.m.Y H:i"
+                                }}
+                            </small>
+                        </div>
+                        <div class="col-auto">
+                            <a href="{% url 'ogrenci_not_duzenle' ogrenci_notu.id %}"
+                                class="btn btn-sm btn-outline-primary">
+                                <i class="ti ti-edit"></i> Düzenle
+                            </a>
+                            <a href="{% url 'ogrenci_not_sil' ogrenci_notu.id %}" class="btn btn-sm btn-outline-danger"
+                                onclick="return confirm('Bu notu silmek istediğinize emin misiniz?')">
+                                <i class="ti ti-trash"></i> Sil
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="text-center py-5">
+                <i class="ti ti-notes" style="font-size: 5rem; opacity: 0.3;"></i>
+                <h4 class="mt-3">Henüz not eklenmemiş</h4>
+                <p class="text-muted">Bu öğrenci için not eklemek üzere yukarıdaki butonu kullanabilirsiniz.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="text-center py-5">
+        <i class="ti ti-notes" style="font-size: 5rem; opacity: 0.3;"></i>
+        <h4 class="mt-3">Henüz not eklenmemiş</h4>
+        <p class="text-muted">Bu öğrenci için not eklemek üzere yukarıdaki butonu kullanabilirsiniz.</p>
+    </div>
+    {% endif %}
+</div>
+</div>
+{% endfor %}
+{% else %}
+<div class="text-center py-5">
+    <i class="ti ti-notes" style="font-size: 5rem; opacity: 0.3;"></i>
+    <h4 class="mt-3">Henüz not eklenmemiş</h4>
+    <p class="text-muted">Bu öğrenci için not eklemek üzere yukarıdaki butonu kullanabilirsiniz.</p>
+</div>
+{% endif %}
+</div>
+</div>
+
+{% endblock %}

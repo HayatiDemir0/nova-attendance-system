@@ -66,8 +66,15 @@
                     <td>{{ ogrenci.veli_telefon|default:"-" }}</td>
                     <td>{% if ogrenci.aktif %}<span class="badge bg-success">Aktif</span>{% else %}<span class="badge bg-secondary">Pasif</span>{% endif %}</td>
                     <td>
-                        <a href="{% url 'ogrenci_duzenle' ogrenci.id %}" class="btn btn-sm btn-outline-primary"><i class="ti ti-edit"></i></a>
-                        <a href="{% url 'ogrenci_sil' ogrenci.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Silmek istediğinize emin misiniz?')"><i class="ti ti-trash"></i></a>
+                        <a href="{% url 'ogrenci_detay' ogrenci.id %}" class="btn btn-sm btn-outline-info" title="Detay ve Notlar">
+                            <i class="ti ti-eye"></i>
+                        </a>
+                        <a href="{% url 'ogrenci_duzenle' ogrenci.id %}" class="btn btn-sm btn-outline-primary" title="Düzenle">
+                            <i class="ti ti-edit"></i>
+                        </a>
+                        <a href="{% url 'ogrenci_sil' ogrenci.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Silmek istediğinize emin misiniz?')" title="Sil">
+                            <i class="ti ti-trash"></i>
+                        </a>
                     </td>
                 </tr>
                 {% empty %}
