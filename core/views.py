@@ -142,7 +142,7 @@ def ders_programi_ekle(request):
         except Exception as e:
             messages.error(request, f'Hata oluştu: {e}')
             
-    return render(request, 'ders/ekle.html', {
+    return render(request, 'ders_programi/ekle.html', {
         'ogretmenler': User.objects.filter(role='ogretmen'),
         'siniflar': Sinif.objects.all()
     })
