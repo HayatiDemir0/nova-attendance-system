@@ -1,64 +1,80 @@
 {% extends 'base.html' %}
-
 {% block title %}Ders Düzenle - Yoklama Sistemi{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Ders Düzenle: {{ ders.ders_adi }}</h2>
-    <a href="{% url 'ders_programi_listesi' %}" class="btn btn-secondary">
-        <i class="bi bi-arrow-left"></i> Geri
-    </a>
+<div class="page-header-section" style="background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); color: white; padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+    <div class="row align-items-center">
+        <div class="col">
+            <h1><i class="ti ti-edit me-3"></i>Ders Düzenle</h1>
+            <p class="mb-0">{{ ders.ders_adi }} - {{ ders.get_gun_display }}</p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'yonetim_ders_programi' %}" class="btn btn-light">
+                <i class="ti ti-arrow-left me-2"></i>Geri Dön
+            </a>
+        </div>
+    </div>
 </div>
 
-<div class="card">
-    <div class="card-body">
+<div class="card shadow-sm border-0">
+    <div class="card-body p-4">
         <form method="post">
             {% csrf_token %}
             
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}<li>{{ error }}</li>{% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Öğretmen</label>
+                    <label class="form-label fw-bold">Öğretmen</label>
                     {{ form.ogretmen }}
                 </div>
-                
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Sınıf</label>
+                    <label class="form-label fw-bold">Sınıf</label>
                     {{ form.sinif }}
                 </div>
             </div>
             
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Ders Adı</label>
+                    <label class="form-label fw-bold">Ders Adı</label>
                     {{ form.ders_adi }}
                 </div>
-                
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Gün</label>
+                    <label class="form-label fw-bold">Gün</label>
                     {{ form.gun }}
                 </div>
             </div>
             
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Başlangıç Saati</label>
+                    <label class="form-label fw-bold">Başlangıç Saati</label>
                     {{ form.baslangic_saati }}
                 </div>
-                
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Bitiş Saati</label>
+                    <label class="form-label fw-bold">Bitiş Saati</label>
                     {{ form.bitis_saati }}
                 </div>
             </div>
             
-            <div class="form-check mb-3">
+            <div class="form-check form-switch mb-4">
                 {{ form.aktif }}
-                <label class="form-check-label">Aktif</label>
+                <label class="form-check-label ms-2">Bu ders şu an aktif</label>
             </div>
             
-            <div class="text-end">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-circle"></i> Güncelle
+            <hr>
+            
+            <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">* Tüm alanların doldurulması zorunludur.</small>
+                <button type="submit" class="btn btn-primary btn-lg px-5">
+                    <i class="ti ti-device-floppy me-2"></i>Değişiklikleri Kaydet
                 </button>
             </div>
         </form>
