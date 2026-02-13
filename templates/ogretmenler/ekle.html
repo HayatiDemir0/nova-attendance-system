@@ -1,14 +1,18 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
-
-{% block title %}Öğretmen Ekle - Yoklama Sistemi{% endblock %}
-
+{% block title %}Öğretmen Ekle{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Yeni Öğretmen Ekle</h2>
-    <a href="{% url 'ogretmen_listesi' %}" class="btn btn-secondary">
-        <i class="bi bi-arrow-left"></i> Geri
-    </a>
+
+<div class="page-header-section" style="background: linear-gradient(135deg, #7B3F9D 0%, #E91E63 100%); color: white; padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+    <div class="row align-items-center">
+        <div class="col">
+            <h1><i class="ti ti-plus me-3"></i>Yeni Öğretmen Ekle</h1>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'yonetim_ogretmenler' %}" class="btn btn-light btn-lg">
+                <i class="ti ti-arrow-left me-2"></i>Geri
+            </a>
+        </div>
+    </div>
 </div>
 
 <div class="card">
@@ -18,76 +22,57 @@
             
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Kullanıcı Adı</label>
-                    {{ form.username }}
-                    {% if form.username.errors %}
-                        <div class="text-danger small">{{ form.username.errors }}</div>
-                    {% endif %}
+                    <label class="form-label">Kullanıcı Adı <span class="text-danger">*</span></label>
+                    <input type="text" name="username" class="form-control" placeholder="Kullanıcı adı" required>
                 </div>
-                
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">E-posta</label>
-                    {{ form.email }}
-                    {% if form.email.errors %}
-                        <div class="text-danger small">{{ form.email.errors }}</div>
-                    {% endif %}
+                    <label class="form-label">Şifre <span class="text-danger">*</span></label>
+                    <input type="password" name="password" class="form-control" placeholder="Şifre" required>
                 </div>
             </div>
             
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Ad</label>
-                    {{ form.first_name }}
-                    {% if form.first_name.errors %}
-                        <div class="text-danger small">{{ form.first_name.errors }}</div>
-                    {% endif %}
+                    <input type="text" name="first_name" class="form-control" placeholder="Ad">
                 </div>
-                
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Soyad</label>
-                    {{ form.last_name }}
-                    {% if form.last_name.errors %}
-                        <div class="text-danger small">{{ form.last_name.errors }}</div>
-                    {% endif %}
+                    <input type="text" name="last_name" class="form-control" placeholder="Soyad">
                 </div>
             </div>
             
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Şifre</label>
-                    {{ form.password1 }}
-                    {% if form.password1.errors %}
-                        <div class="text-danger small">{{ form.password1.errors }}</div>
-                    {% endif %}
+                    <label class="form-label">E-posta</label>
+                    <input type="email" name="email" class="form-control" placeholder="ornek@email.com">
                 </div>
-                
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Şifre Tekrar</label>
-                    {{ form.password2 }}
-                    {% if form.password2.errors %}
-                        <div class="text-danger small">{{ form.password2.errors }}</div>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Telefon</label>
-                    {{ form.telefon }}
-                </div>
-                
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Adres</label>
-                    {{ form.adres }}
+                    <input type="text" name="telefon" class="form-control" placeholder="0555 123 45 67">
                 </div>
             </div>
+
+            <div class="mb-3">
+                <label class="form-label">Adres</label>
+                <textarea name="adres" class="form-control" rows="3" placeholder="Adres bilgisi (opsiyonel)"></textarea>
+            </div>
             
-            <div class="text-end">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-circle"></i> Kaydet
+            <div class="alert alert-info">
+                <i class="ti ti-info-circle me-2"></i>
+                <strong>Not:</strong> Kullanıcı adı ve şifre zorunludur. Öğretmen bu bilgilerle sisteme giriş yapacaktır.
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="ti ti-check me-2"></i>Kaydet
                 </button>
+                <a href="{% url 'yonetim_ogretmenler' %}" class="btn btn-outline-secondary btn-lg">
+                    <i class="ti ti-x me-2"></i>İptal
+                </a>
             </div>
         </form>
     </div>
 </div>
+
 {% endblock %}
