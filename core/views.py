@@ -29,6 +29,9 @@ def login_view(request):
             messages.error(request, 'Kullanıcı adı veya şifre hatalı!')
     
     return render(request, 'login.html')
+def register_view(request):
+    """Kayıt Sayfası"""
+    return render(request, 'register.html')
 
 def logout_view(request):
     """Çıkış İşlemi"""
