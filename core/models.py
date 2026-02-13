@@ -51,7 +51,6 @@ class Ogrenci(models.Model):
     veli_adi = models.CharField(max_length=100)
     veli_telefon = models.CharField(max_length=15)
     adres = models.TextField(blank=True)
-    fotograf = models.ImageField(upload_to='ogrenci_resimleri/', blank=True, null=True)
     kayit_tarihi = models.DateTimeField(auto_now_add=True)
     aktif = models.BooleanField(default=True)
     
