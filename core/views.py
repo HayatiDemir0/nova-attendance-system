@@ -48,11 +48,14 @@ def dashboard(request):
     bugun = timezone.now().date()
     gun_index = bugun.weekday() + 1
     
+    # Burada da derslik hatasını önlemek için only() kullanıyoruz
     context['bugun_dersler'] = DersProgrami.objects.filter(
         ogretmen=request.user,
         gun=gun_index,
         aktif=True
-    ).select_related('sinif').order_by('baslangic_saati')
+    ).select_related('sinif').only(
+        'id', 'ders_adi', 'gun', 'baslangic_saati', 'bitis_saati', 'ogretmen', 'sinif', 'aktif'
+    ).order_by('baslangic_saati')
     
     context['bugun_yoklamalar'] = Yoklama.objects.filter(
         ogretmen=request.user,
@@ -89,7 +92,6 @@ def yonetim_panel(request):
         'toplam_ogrenci': Ogrenci.objects.filter(aktif=True).count(),
         'bugun_yoklama': Yoklama.objects.filter(tarih=timezone.now().date()).count(),
         'son_yoklamalar': Yoklama.objects.all().order_by('-tarih')[:5],
-        # Fotograf alanını sorgudan çıkardık
         'son_ogrenciler': Ogrenci.objects.only('ad', 'soyad', 'sinif', 'aktif').select_related('sinif').order_by('-id')[:5],
         'bu_ay_yoklama': Yoklama.objects.filter(
             tarih__month=timezone.now().month,
@@ -137,7 +139,6 @@ def yonetim_ogrenciler(request):
         return redirect('dashboard')
     
     siniflar = Sinif.objects.all()
-    # Fotograf sütununu çekmiyoruz
     ogrenciler = Ogrenci.objects.only('ad', 'soyad', 'tc_kimlik', 'sinif', 'veli_adi', 'veli_telefon', 'aktif').select_related('sinif')
     
     secili_sinif = request.GET.get('sinif', '')
@@ -168,14 +169,18 @@ def yonetim_ogrenciler(request):
 
 @login_required
 def yonetim_ders_programi(request):
-    """Ders Programı Yönetimi"""
+    """Ders Programı Yönetimi - Derslik Hatası Giderildi"""
     if request.user.role != 'admin':
         messages.error(request, 'Bu sayfaya erişim yetkiniz yok!')
         return redirect('dashboard')
     
     ogretmenler = User.objects.filter(role='ogretmen')
     siniflar = Sinif.objects.all()
-    dersler = DersProgrami.objects.select_related('ogretmen', 'sinif')
+    
+    # Kritik Fix: .only() ile sadece veritabanında var olan alanları çağırıyoruz
+    dersler = DersProgrami.objects.select_related('ogretmen', 'sinif').only(
+        'id', 'ders_adi', 'gun', 'baslangic_saati', 'bitis_saati', 'ogretmen', 'sinif', 'aktif'
+    )
     
     secili_ogretmen = request.GET.get('ogretmen', '')
     secili_sinif = request.GET.get('sinif', '')
@@ -259,11 +264,11 @@ def yonetim_ayarlar(request):
     }
     return render(request, 'yonetim/ayarlar.html', context)
 
-# ==================== ÖĞRENCİ CRUD (TEMİZLENDİ) ====================
+# ==================== ÖĞRENCİ CRUD ====================
 
 @login_required
 def ogrenci_ekle(request):
-    """Öğrenci Ekle - Fotoğraf Yok"""
+    """Öğrenci Ekle"""
     if request.user.role != 'admin':
         messages.error(request, 'Bu sayfaya erişim yetkiniz yok!')
         return redirect('dashboard')
@@ -302,7 +307,7 @@ def ogrenci_ekle(request):
 
 @login_required
 def ogrenci_duzenle(request, pk):
-    """Öğrenci Düzenle - Fotoğraf Yok"""
+    """Öğrenci Düzenle"""
     if request.user.role != 'admin':
         messages.error(request, 'Bu sayfaya erişim yetkiniz yok!')
         return redirect('dashboard')
@@ -481,7 +486,7 @@ def ders_programi_sil(request, pk):
     messages.success(request, 'Ders silindi!')
     return redirect('yonetim_ders_programi')
 
-# ==================== YOKLAMA VE NOTLAR (BOŞ FONKSİYONLAR) ====================
+# ==================== YOKLAMA VE NOTLAR ====================
 
 @login_required
 def yoklama_al(request, ders_id):
