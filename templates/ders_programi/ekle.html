@@ -1,13 +1,18 @@
 {% extends 'base.html' %}
-
-{% block title %}Ders Ekle - Yoklama Sistemi{% endblock %}
-
+{% block title %}Ders Ekle{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Yeni Ders Ekle</h2>
-    <a href="{% url 'ders_programi_listesi' %}" class="btn btn-secondary">
-        <i class="bi bi-arrow-left"></i> Geri
-    </a>
+
+<div class="page-header-section" style="background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); color: white; padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+    <div class="row align-items-center">
+        <div class="col">
+            <h1><i class="ti ti-plus me-3"></i>Yeni Ders Ekle</h1>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'yonetim_ders_programi' %}" class="btn btn-light btn-lg">
+                <i class="ti ti-arrow-left me-2"></i>Geri
+            </a>
+        </div>
+    </div>
 </div>
 
 <div class="card">
@@ -17,69 +22,87 @@
             
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Öğretmen</label>
-                    {{ form.ogretmen }}
-                    {% if form.ogretmen.errors %}
-                        <div class="text-danger small">{{ form.ogretmen.errors }}</div>
-                    {% endif %}
+                    <label class="form-label">Ders Adı <span class="text-danger">*</span></label>
+                    <input type="text" name="ders_adi" class="form-control" placeholder="Örn: Matematik, Türkçe" required>
                 </div>
                 
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Sınıf</label>
-                    {{ form.sinif }}
-                    {% if form.sinif.errors %}
-                        <div class="text-danger small">{{ form.sinif.errors }}</div>
-                    {% endif %}
+                    <label class="form-label">Gün <span class="text-danger">*</span></label>
+                    <select name="gun" class="form-select" required>
+                        <option value="">Gün seçiniz...</option>
+                        <option value="1">Pazartesi</option>
+                        <option value="2">Salı</option>
+                        <option value="3">Çarşamba</option>
+                        <option value="4">Perşembe</option>
+                        <option value="5">Cuma</option>
+                        <option value="6">Cumartesi</option>
+                        <option value="7">Pazar</option>
+                    </select>
                 </div>
             </div>
             
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Ders Adı</label>
-                    {{ form.ders_adi }}
-                    {% if form.ders_adi.errors %}
-                        <div class="text-danger small">{{ form.ders_adi.errors }}</div>
-                    {% endif %}
+                    <label class="form-label">Başlangıç Saati <span class="text-danger">*</span></label>
+                    <input type="time" name="baslangic_saati" class="form-control" required>
                 </div>
                 
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Gün</label>
-                    {{ form.gun }}
-                    {% if form.gun.errors %}
-                        <div class="text-danger small">{{ form.gun.errors }}</div>
-                    {% endif %}
+                    <label class="form-label">Bitiş Saati <span class="text-danger">*</span></label>
+                    <input type="time" name="bitis_saati" class="form-control" required>
                 </div>
             </div>
             
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Başlangıç Saati</label>
-                    {{ form.baslangic_saati }}
-                    {% if form.baslangic_saati.errors %}
-                        <div class="text-danger small">{{ form.baslangic_saati.errors }}</div>
-                    {% endif %}
+                    <label class="form-label">Öğretmen <span class="text-danger">*</span></label>
+                    <select name="ogretmen" class="form-select" required>
+                        <option value="">Öğretmen seçiniz...</option>
+                        {% for ogretmen in ogretmenler %}
+                        <option value="{{ ogretmen.id }}">{{ ogretmen.get_full_name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Bitiş Saati</label>
-                    {{ form.bitis_saati }}
-                    {% if form.bitis_saati.errors %}
-                        <div class="text-danger small">{{ form.bitis_saati.errors }}</div>
-                    {% endif %}
+                    <label class="form-label">Sınıf <span class="text-danger">*</span></label>
+                    <select name="sinif" class="form-select" required>
+                        <option value="">Sınıf seçiniz...</option>
+                        {% for sinif in siniflar %}
+                        <option value="{{ sinif.id }}">{{ sinif.ad }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
             
-            <div class="form-check mb-3">
-                {{ form.aktif }}
-                <label class="form-check-label">Aktif</label>
+            <div class="mb-3">
+                <label class="form-label">Derslik</label>
+                <input type="text" name="derslik" class="form-control" placeholder="Örn: A-101, Lab-1">
+                <small class="text-muted">Opsiyonel</small>
             </div>
             
-            <div class="text-end">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-circle"></i> Kaydet
+            <div class="mb-3">
+                <label class="form-check form-switch">
+                    <input type="checkbox" name="aktif" class="form-check-input" checked>
+                    <span class="form-check-label">Aktif</span>
+                </label>
+            </div>
+            
+            <div class="alert alert-info">
+                <i class="ti ti-info-circle me-2"></i>
+                <strong>Not:</strong> Aynı öğretmen, sınıf, gün ve saat için birden fazla ders eklenemez.
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="ti ti-check me-2"></i>Kaydet
                 </button>
+                <a href="{% url 'yonetim_ders_programi' %}" class="btn btn-outline-secondary btn-lg">
+                    <i class="ti ti-x me-2"></i>İptal
+                </a>
             </div>
         </form>
     </div>
 </div>
+
 {% endblock %}
