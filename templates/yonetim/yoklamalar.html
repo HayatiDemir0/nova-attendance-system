@@ -4,54 +4,170 @@
 
 <div style="background: linear-gradient(135deg, #9C27B0 0%, #8E24AA 100%); color: white; padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
     <h1><i class="ti ti-clipboard-check me-3"></i>Yoklama Yönetimi</h1>
+    <p class="mb-0">Tüm yoklamaları görüntüleyin ve yönetin</p>
 </div>
 
+<!-- FİLTRELEME -->
 <div class="card mb-4">
     <div class="card-body">
         <form method="get" class="row g-3">
-            <div class="col-md-3"><select name="ogretmen" class="form-select"><option value="">Tüm Öğretmenler</option>{% for ogretmen in ogretmenler %}<option value="{{ ogretmen.id }}">{{ ogretmen.get_full_name }}</option>{% endfor %}</select></div>
-            <div class="col-md-3"><select name="sinif" class="form-select"><option value="">Tüm Sınıflar</option>{% for sinif in siniflar %}<option value="{{ sinif.id }}">{{ sinif.ad }}</option>{% endfor %}</select></div>
-            <div class="col-md-3"><input type="date" name="tarih" class="form-control" value="{{ secili_tarih|default:'' }}"></div>
-            <div class="col-md-3"><button type="submit" class="btn btn-primary w-100"><i class="ti ti-search me-2"></i>Filtrele</button></div>
+            <div class="col-md-3">
+                <label class="form-label">Öğretmen</label>
+                <select name="ogretmen" class="form-select">
+                    <option value="">Tüm Öğretmenler</option>
+                    {% for ogretmen in ogretmenler %}
+                    <option value="{{ ogretmen.id }}" {% if secili_ogretmen == ogretmen.id|stringformat:"s" %}selected{% endif %}>
+                        {{ ogretmen.get_full_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label">Sınıf</label>
+                <select name="sinif" class="form-select">
+                    <option value="">Tüm Sınıflar</option>
+                    {% for sinif in siniflar %}
+                    <option value="{{ sinif.id }}" {% if secili_sinif == sinif.id|stringformat:"s" %}selected{% endif %}>
+                        {{ sinif.ad }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label">Tarih</label>
+                <input type="date" name="tarih" class="form-control" value="{{ secili_tarih|default:'' }}">
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label">&nbsp;</label>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="ti ti-search me-2"></i>Filtrele
+                </button>
+            </div>
         </form>
     </div>
 </div>
 
+<!-- YOKLAMA LİSTESİ -->
 <div class="card">
+    <div class="card-header" style="background: #f8f9fa; border-bottom: 2px solid #9C27B0;">
+        <h3>
+            {% if yoklamalar.paginator.count %}
+                Toplam {{ yoklamalar.paginator.count }} Yoklama
+            {% else %}
+                Yoklama Listesi
+            {% endif %}
+        </h3>
+    </div>
     <div class="table-responsive">
-        <table class="table table-hover">
-            <thead><tr><th>Tarih</th><th>Saat</th><th>Sınıf</th><th>Öğretmen</th><th>Ders Konusu</th><th>İşlemler</th></tr></thead>
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Tarih</th>
+                    <th>Saat</th>
+                    <th>Sınıf</th>
+                    <th>Öğretmen</th>
+                    <th>Ders Konusu</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
             <tbody>
                 {% for yoklama in yoklamalar %}
                 <tr>
+                    <td>{{ forloop.counter }}</td>
                     <td><strong>{{ yoklama.tarih|date:"d.m.Y" }}</strong></td>
                     <td>{{ yoklama.olusturma_zamani|time:"H:i" }}</td>
                     <td><span class="badge bg-info">{{ yoklama.sinif.ad }}</span></td>
                     <td>{{ yoklama.ogretmen.get_full_name }}</td>
-                    <td>{{ yoklama.ders_basligi|truncatewords:5 }}</td>
+                    <td>{{ yoklama.ders_basligi|truncatewords:8 }}</td>
                     <td>
-                        <a href="{% url 'yoklama_detay' yoklama.id %}" class="btn btn-sm btn-outline-primary"><i class="ti ti-eye"></i> Detay</a>
-                        <a href="{% url 'yoklama_duzenle' yoklama.id %}" class="btn btn-sm btn-outline-warning"><i class="ti ti-edit"></i> Düzenle</a>
+                        <a href="{% url 'yoklama_detay' yoklama.id %}" class="btn btn-sm btn-outline-primary" title="Detay">
+                            <i class="ti ti-eye"></i>
+                        </a>
+                        <a href="{% url 'yoklama_duzenle' yoklama.id %}" class="btn btn-sm btn-outline-warning" title="Düzenle">
+                            <i class="ti ti-edit"></i>
+                        </a>
                     </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="6" class="text-center py-5">Yoklama bulunamadı.</td></tr>
+                <tr>
+                    <td colspan="7" class="text-center py-5">
+                        <i class="ti ti-clipboard-check" style="font-size: 4rem; opacity: 0.3;"></i>
+                        <p class="text-muted mt-3">
+                            {% if secili_ogretmen or secili_sinif or secili_tarih %}
+                                Filtrelere uygun yoklama bulunamadı.
+                            {% else %}
+                                Henüz yoklama alınmamış.
+                            {% endif %}
+                        </p>
+                    </td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
 
+<!-- PAGİNATİON -->
 {% if yoklamalar.has_other_pages %}
 <nav class="mt-4">
     <ul class="pagination justify-content-center">
-        {% if yoklamalar.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ yoklamalar.previous_page_number }}">Önceki</a></li>{% endif %}
-        <li class="page-item active"><span class="page-link">{{ yoklamalar.number }} / {{ yoklamalar.paginator.num_pages }}</span></li>
-        {% if yoklamalar.has_next %}<li class="page-item"><a class="page-link" href="?page={{ yoklamalar.next_page_number }}">Sonraki</a></li>{% endif %}
+        {% if yoklamalar.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ yoklamalar.previous_page_number }}{% if secili_ogretmen %}&ogretmen={{ secili_ogretmen }}{% endif %}{% if secili_sinif %}&sinif={{ secili_sinif }}{% endif %}{% if secili_tarih %}&tarih={{ secili_tarih }}{% endif %}">
+                <i class="ti ti-arrow-left me-1"></i>Önceki
+            </a>
+        </li>
+        {% endif %}
+        
+        <li class="page-item active">
+            <span class="page-link">{{ yoklamalar.number }} / {{ yoklamalar.paginator.num_pages }}</span>
+        </li>
+        
+        {% if yoklamalar.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ yoklamalar.next_page_number }}{% if secili_ogretmen %}&ogretmen={{ secili_ogretmen }}{% endif %}{% if secili_sinif %}&sinif={{ secili_sinif }}{% endif %}{% if secili_tarih %}&tarih={{ secili_tarih }}{% endif %}">
+                Sonraki<i class="ti ti-arrow-right ms-1"></i>
+            </a>
+        </li>
+        {% endif %}
     </ul>
 </nav>
 {% endif %}
 
-<div class="mt-3"><a href="{% url 'yonetim_panel' %}" class="btn btn-outline-secondary btn-lg"><i class="ti ti-arrow-left me-2"></i>Geri</a></div>
+<!-- İSTATİSTİKLER -->
+{% if yoklamalar %}
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <h3 class="text-primary">{{ yoklamalar.paginator.count }}</h3>
+                        <p class="text-muted mb-0">Toplam Yoklama</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h3 class="text-success">{{ ogretmenler.count }}</h3>
+                        <p class="text-muted mb-0">Öğretmen</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h3 class="text-info">{{ siniflar.count }}</h3>
+                        <p class="text-muted mb-0">Sınıf</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="mt-3">
+    <a href="{% url 'yonetim_panel' %}" class="btn btn-outline-secondary btn-lg">
+        <i class="ti ti-arrow-left me-2"></i>Geri
+    </a>
+</div>
 
 {% endblock %}
