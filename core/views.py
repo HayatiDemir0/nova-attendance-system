@@ -332,13 +332,13 @@ def yonetim_ayarlar(request):
 
 @login_required
 def ogrenci_ekle(request):
-    """Öğrenci Ekle"""
     if request.user.role != 'admin':
         messages.error(request, 'Bu sayfaya erişim yetkiniz yok!')
         return redirect('dashboard')
     
     siniflar = Sinif.objects.all()
     if request.method == 'POST':
+        # Formdan verileri alıyoruz
         ad = request.POST.get('ad', '').strip()
         soyad = request.POST.get('soyad', '').strip()
         tc_kimlik = request.POST.get('tc_kimlik', '').strip()
@@ -347,28 +347,28 @@ def ogrenci_ekle(request):
         sinif_id = request.POST.get('sinif')
         veli_adi = request.POST.get('veli_adi', '').strip()
         veli_telefon = request.POST.get('veli_telefon', '').strip()
-        veli_email = request.POST.get('veli_email', '').strip()
         adres = request.POST.get('adres', '').strip()
         
-        if not ad or not soyad or not tc_kimlik or not dogum_tarihi or not sinif_id:
-            messages.error(request, 'Zorunlu alanları doldurun!')
-            return redirect('ogrenci_ekle')
+        # NOT: veli_email modelde yoksa buraya ekleme!
         
-        if Ogrenci.objects.filter(tc_kimlik=tc_kimlik).exists():
-            messages.error(request, 'Bu TC Kimlik numarası zaten kayıtlı!')
-            return redirect('ogrenci_ekle')
-        
-        Ogrenci.objects.create(
-            ad=ad, soyad=soyad, tc_kimlik=tc_kimlik,
-            dogum_tarihi=dogum_tarihi, cinsiyet=cinsiyet,
-            sinif_id=sinif_id, veli_adi=veli_adi,
-            veli_telefon=veli_telefon, veli_email=veli_email, adres=adres
-        )
-        messages.success(request, f'{ad} {soyad} başarıyla eklendi!')
-        return redirect('yonetim_ogrenciler')
-    
+        try:
+            Ogrenci.objects.create(
+                ad=ad, 
+                soyad=soyad, 
+                tc_kimlik=tc_kimlik,
+                dogum_tarihi=dogum_tarihi, 
+                cinsiyet=cinsiyet,
+                sinif_id=sinif_id, 
+                veli_adi=veli_adi,
+                veli_telefon=veli_telefon, 
+                adres=adres
+            )
+            messages.success(request, f'{ad} {soyad} başarıyla eklendi!')
+            return redirect('yonetim_ogrenciler')
+        except Exception as e:
+            messages.error(request, f'Bir hata oluştu: {e}')
+            
     return render(request, 'ogrenciler/ekle.html', {'siniflar': siniflar})
-
 @login_required
 def ogrenci_duzenle(request, pk):
     """Öğrenci Düzenle"""
