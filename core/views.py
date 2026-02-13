@@ -35,7 +35,6 @@ def logout_view(request):
     logout(request)
     messages.success(request, 'Başarıyla çıkış yaptınız!')
     return redirect('login')
-
 @login_required
 def dashboard(request):
     if request.user.role == 'admin':
@@ -43,14 +42,17 @@ def dashboard(request):
     
     context = {}
     bugun = timezone.now().date()
+    # isoweekday: Pzt=1, Sal=2, Çar=3, Per=4, Cum=5, Cmt=6, Paz=7
     gun_index = bugun.isoweekday() 
     
+    # Filtreleme: Gün bilgisini hem sayı hem metin olarak kontrol ediyoruz
     context['bugun_dersler'] = DersProgrami.objects.filter(
         ogretmen=request.user,
         gun__in=[str(gun_index), gun_index],
         aktif=True
     ).select_related('sinif').order_by('baslangic_saati')
     
+    # Yoklama kontrolleri
     context['bugun_yoklamalar'] = Yoklama.objects.filter(
         ogretmen=request.user,
         tarih=bugun
