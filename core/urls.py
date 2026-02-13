@@ -36,8 +36,8 @@ urlpatterns = [
     path('ogrenciler/<int:pk>/duzenle/', views.ogrenci_duzenle, name='ogrenci_duzenle'),
     path('ogrenciler/<int:pk>/sil/', views.ogrenci_sil, name='ogrenci_sil'),
     path('ogrenciler/<int:pk>/not-ekle/', views.ogrenci_not_ekle, name='ogrenci_not_ekle'),
-    path('ogrenci-notu/<int:pk>/duzenle/', views.ogrenci_not_duzenle, name='ogrenci_not_duzenle'),
-    path('ogrenci-notu/<int:pk>/sil/', views.ogrenci_not_sil, name='ogrenci_not_sil'),
+    path('ogrenciler/<int:pk>/duzenle/', views.ogrenci_not_duzenle, name='ogrenci_not_duzenle'),
+    path('ogrenciler/<int:pk>/sil/', views.ogrenci_not_sil, name='ogrenci_not_sil'),
     
     # Ders Programı (Views içindeki isimlerle güncellendi)
     path('ders-programi/', views.yonetim_ders_programi, name='ders_programi_listesi'), # ders_programi_listesi yerine yonetim_ders_programi

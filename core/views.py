@@ -30,10 +30,6 @@ def login_view(request):
     
     return render(request, 'login.html')
 
-def register_view(request):
-    """Kayıt Sayfası"""
-    return render(request, 'register.html')
-
 def logout_view(request):
     """Çıkış İşlemi"""
     logout(request)
@@ -85,7 +81,7 @@ def takvim(request):
     yoklamalar_sorgu = Yoklama.objects.filter(
         tarih__year=yil, 
         tarih__month=ay
-    ).select_related('sinif')
+    ).select_related('siniflar')
 
     # Yoklamaları günlere göre grupla (Template'deki get_item filtresi için)
     yoklamalar_dict = {}
@@ -418,7 +414,7 @@ def ogrenci_detay(request, pk):
     """Öğrenci Detay"""
     ogrenci = get_object_or_404(Ogrenci, pk=pk)
     notlar = ogrenci.notlar.all()
-    return render(request, 'yonetim/ogrenci_detay.html', {'ogrenci': ogrenci, 'notlar': notlar})
+    return render(request, 'ogrenciler/ogrenci_detay.html', {'ogrenci': ogrenci, 'notlar': notlar})
 
 # ==================== ÖĞRETMEN CRUD ====================
 
