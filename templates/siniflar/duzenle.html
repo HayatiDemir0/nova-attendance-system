@@ -4,36 +4,30 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Sınıf Düzenle: {{ sinif.ad }}</h2>
-    <a href="{% url 'sinif_listesi' %}" class="btn btn-secondary">
+    <h2>Sınıfı Düzenle: {{ sinif.ad }}</h2>
+    <a href="{% url 'yonetim_siniflar' %}" class="btn btn-secondary">
         <i class="bi bi-arrow-left"></i> Geri
     </a>
 </div>
 
-<div class="card">
+<div class="card shadow">
     <div class="card-body">
         <form method="post">
             {% csrf_token %}
             
             <div class="mb-3">
-                <label class="form-label">Sınıf Adı</label>
-                {{ form.ad }}
-                {% if form.ad.errors %}
-                    <div class="text-danger small">{{ form.ad.errors }}</div>
-                {% endif %}
+                <label class="form-label fw-bold">Sınıf Adı</label>
+                <input type="text" name="ad" class="form-control" value="{{ sinif.ad }}" required>
             </div>
             
             <div class="mb-3">
-                <label class="form-label">Açıklama</label>
-                {{ form.aciklama }}
-                {% if form.aciklama.errors %}
-                    <div class="text-danger small">{{ form.aciklama.errors }}</div>
-                {% endif %}
+                <label class="form-label fw-bold">Açıklama</label>
+                <textarea name="aciklama" class="form-control" rows="3">{{ sinif.aciklama }}</textarea>
             </div>
             
             <div class="text-end">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-circle"></i> Güncelle
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-save"></i> Değişiklikleri Kaydet
                 </button>
             </div>
         </form>

@@ -42,22 +42,18 @@ def logout_view(request):
 
 @login_required
 def dashboard(request):
-    """Dashboard - Rol Bazlı"""
     if request.user.role == 'admin':
         return redirect('yonetim_panel')
     
     context = {}
     bugun = timezone.now().date()
-    gun_index = bugun.weekday() + 1
+    gun_index = bugun.isoweekday() 
     
-    # Burada da derslik hatasını önlemek için only() kullanıyoruz
     context['bugun_dersler'] = DersProgrami.objects.filter(
         ogretmen=request.user,
-        gun=gun_index,
+        gun__in=[str(gun_index), gun_index],
         aktif=True
-    ).select_related('sinif').only(
-        'id', 'ders_adi', 'gun', 'baslangic_saati', 'bitis_saati', 'ogretmen', 'sinif', 'aktif'
-    ).order_by('baslangic_saati')
+    ).select_related('sinif').order_by('baslangic_saati')
     
     context['bugun_yoklamalar'] = Yoklama.objects.filter(
         ogretmen=request.user,
@@ -72,8 +68,8 @@ def dashboard(request):
         ders_programlari__aktif=True
     ).distinct()
     
+    context['bugun'] = bugun
     return render(request, 'dashboard.html', context)
-
 @login_required
 def takvim(request):
     """Gelişmiş Takvim Görünümü Mantığı"""
@@ -481,25 +477,36 @@ def ogretmen_sil(request, pk):
 
 @login_required
 def sinif_ekle(request):
-    """Sınıf Ekle"""
+    """Sınıf Ekleme - Template ile uyumlu hale getirildi"""
     if request.method == 'POST':
         ad = request.POST.get('ad', '').strip()
         aciklama = request.POST.get('aciklama', '').strip()
-        Sinif.objects.create(ad=ad, aciklama=aciklama)
-        messages.success(request, 'Sınıf eklendi!')
-        return redirect('yonetim_siniflar')
+        if ad:
+            Sinif.objects.create(ad=ad, aciklama=aciklama)
+            messages.success(request, 'Sınıf başarıyla eklendi!')
+            return redirect('yonetim_siniflar')
+        else:
+            messages.error(request, 'Sınıf adı boş bırakılamaz!')
+    
+    # Template içindeki {{ form.ad }} yapısının hata vermemesi için
+    # basit bir form yapısı simüle ediyoruz veya manuel inputa dönüyoruz.
     return render(request, 'siniflar/ekle.html')
 
 @login_required
 def sinif_duzenle(request, pk):
-    """Sınıf Düzenle"""
+    """Sınıf Düzenleme - Mevcut verileri çekip template'e gönderir"""
     sinif = get_object_or_404(Sinif, pk=pk)
+    
     if request.method == 'POST':
         sinif.ad = request.POST.get('ad', '').strip()
         sinif.aciklama = request.POST.get('aciklama', '').strip()
-        sinif.save()
-        messages.success(request, 'Sınıf güncellendi!')
-        return redirect('yonetim_siniflar')
+        if sinif.ad:
+            sinif.save()
+            messages.success(request, 'Sınıf bilgileri güncellendi!')
+            return redirect('yonetim_siniflar')
+        else:
+            messages.error(request, 'Sınıf adı boş olamaz!')
+            
     return render(request, 'siniflar/duzenle.html', {'sinif': sinif})
 
 @login_required
@@ -514,9 +521,9 @@ def sinif_sil(request, pk):
 
 @login_required
 def ders_programi_ekle(request):
-    """Ders Programı Ekle"""
-    ogretmenler = User.objects.filter(role='ogretmen')
-    siniflar = Sinif.objects.all()
+    if request.user.role != 'admin':
+        return redirect('dashboard')
+        
     if request.method == 'POST':
         DersProgrami.objects.create(
             ders_adi=request.POST.get('ders_adi'),
@@ -525,18 +532,19 @@ def ders_programi_ekle(request):
             bitis_saati=request.POST.get('bitis_saati'),
             ogretmen_id=request.POST.get('ogretmen'),
             sinif_id=request.POST.get('sinif'),
-            aktif=request.POST.get('aktif') == 'on'
+            aktif=True if request.POST.get('aktif') == 'on' else False
         )
-        messages.success(request, 'Ders programı eklendi!')
+        messages.success(request, 'Ders başarıyla eklendi!')
         return redirect('yonetim_ders_programi')
-    return render(request, 'ders_programi/ekle.html', {'ogretmenler': ogretmenler, 'siniflar': siniflar})
+            
+    return render(request, 'ders_programi/ekle.html', {
+        'ogretmenler': User.objects.filter(role='ogretmen'),
+        'siniflar': Sinif.objects.all()
+    })
 
 @login_required
 def ders_programi_duzenle(request, pk):
-    """Ders Programı Düzenle"""
     ders = get_object_or_404(DersProgrami, pk=pk)
-    ogretmenler = User.objects.filter(role='ogretmen')
-    siniflar = Sinif.objects.all()
     if request.method == 'POST':
         ders.ders_adi = request.POST.get('ders_adi')
         ders.gun = request.POST.get('gun')
@@ -544,11 +552,16 @@ def ders_programi_duzenle(request, pk):
         ders.bitis_saati = request.POST.get('bitis_saati')
         ders.ogretmen_id = request.POST.get('ogretmen')
         ders.sinif_id = request.POST.get('sinif')
-        ders.aktif = request.POST.get('aktif') == 'on'
+        ders.aktif = True if request.POST.get('aktif') == 'on' else False
         ders.save()
         messages.success(request, 'Ders programı güncellendi!')
         return redirect('yonetim_ders_programi')
-    return render(request, 'ders_programi/duzenle.html', {'ders': ders, 'ogretmenler': ogretmenler, 'siniflar': siniflar})
+    
+    return render(request, 'ders_programi/duzenle.html', {
+        'ders': ders, 
+        'ogretmenler': User.objects.filter(role='ogretmen'), 
+        'siniflar': Sinif.objects.all()
+    })
 
 @login_required
 def ders_programi_sil(request, pk):
