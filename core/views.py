@@ -545,18 +545,34 @@ def ders_programi_ekle(request):
 
 @login_required
 def ders_programi_duzenle(request, pk):
+    if request.user.role != 'admin':
+        return redirect('dashboard')
+        
     ders = get_object_or_404(DersProgrami, pk=pk)
+    
     if request.method == 'POST':
-        ders.ders_adi = request.POST.get('ders_adi')
-        ders.gun = request.POST.get('gun')
-        ders.baslangic_saati = request.POST.get('baslangic_saati')
-        ders.bitis_saati = request.POST.get('bitis_saati')
-        ders.ogretmen_id = request.POST.get('ogretmen')
-        ders.sinif_id = request.POST.get('sinif')
-        ders.aktif = True if request.POST.get('aktif') == 'on' else False
-        ders.save()
-        messages.success(request, 'Ders programı güncellendi!')
-        return redirect('yonetim_ders_programi')
+        # Formdan gelen verileri al
+        ders_adi = request.POST.get('ders_adi')
+        gun = request.POST.get('gun')
+        baslangic = request.POST.get('baslangic_saati')
+        bitis = request.POST.get('bitis_saati')
+        ogretmen_id = request.POST.get('ogretmen')
+        sinif_id = request.POST.get('sinif')
+
+        # Eğer temel veriler boş gelirse işlemi durdur
+        if not all([ders_adi, gun, baslangic, bitis, ogretmen_id, sinif_id]):
+            messages.error(request, "Lütfen tüm zorunlu alanları doldurun!")
+        else:
+            ders.ders_adi = ders_adi
+            ders.gun = gun
+            ders.baslangic_saati = baslangic
+            ders.bitis_saati = bitis
+            ders.ogretmen_id = ogretmen_id
+            ders.sinif_id = sinif_id
+            ders.aktif = True if request.POST.get('aktif') == 'on' else False
+            ders.save()
+            messages.success(request, 'Ders programı başarıyla güncellendi!')
+            return redirect('yonetim_ders_programi')
     
     return render(request, 'ders_programi/duzenle.html', {
         'ders': ders, 
