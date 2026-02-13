@@ -15,19 +15,19 @@
     </div>
 </div>
 
-<div class="card">
+<div class="card shadow-sm border-0">
     <div class="card-body">
         <form method="post">
             {% csrf_token %}
             
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Ders Adı <span class="text-danger">*</span></label>
+                    <label class="form-label font-weight-bold">Ders Adı <span class="text-danger">*</span></label>
                     <input type="text" name="ders_adi" class="form-control" placeholder="Örn: Matematik, Türkçe" required>
                 </div>
                 
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Gün <span class="text-danger">*</span></label>
+                    <label class="form-label font-weight-bold">Gün <span class="text-danger">*</span></label>
                     <select name="gun" class="form-select" required>
                         <option value="">Gün seçiniz...</option>
                         <option value="1">Pazartesi</option>
@@ -43,29 +43,29 @@
             
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Başlangıç Saati <span class="text-danger">*</span></label>
+                    <label class="form-label font-weight-bold">Başlangıç Saati <span class="text-danger">*</span></label>
                     <input type="time" name="baslangic_saati" class="form-control" required>
                 </div>
                 
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Bitiş Saati <span class="text-danger">*</span></label>
+                    <label class="form-label font-weight-bold">Bitiş Saati <span class="text-danger">*</span></label>
                     <input type="time" name="bitis_saati" class="form-control" required>
                 </div>
             </div>
             
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Öğretmen <span class="text-danger">*</span></label>
+                    <label class="form-label font-weight-bold">Öğretmen <span class="text-danger">*</span></label>
                     <select name="ogretmen" class="form-select" required>
                         <option value="">Öğretmen seçiniz...</option>
                         {% for ogretmen in ogretmenler %}
-                        <option value="{{ ogretmen.id }}">{{ ogretmen.get_full_name }}</option>
+                        <option value="{{ ogretmen.id }}">{{ ogretmen.get_full_name|default:ogretmen.username }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Sınıf <span class="text-danger">*</span></label>
+                    <label class="form-label font-weight-bold">Sınıf <span class="text-danger">*</span></label>
                     <select name="sinif" class="form-select" required>
                         <option value="">Sınıf seçiniz...</option>
                         {% for sinif in siniflar %}
@@ -75,30 +75,30 @@
                 </div>
             </div>
             
-            <div class="mb-3">
-                <label class="form-label">Derslik</label>
-                <input type="text" name="derslik" class="form-control" placeholder="Örn: A-101, Lab-1">
-                <small class="text-muted">Opsiyonel</small>
-            </div>
-            
-            <div class="mb-3">
+            <div class="mb-4">
                 <label class="form-check form-switch">
                     <input type="checkbox" name="aktif" class="form-check-input" checked>
-                    <span class="form-check-label">Aktif</span>
+                    <span class="form-check-label">Ders Aktif</span>
                 </label>
             </div>
             
-            <div class="alert alert-info">
-                <i class="ti ti-info-circle me-2"></i>
-                <strong>Not:</strong> Aynı öğretmen, sınıf, gün ve saat için birden fazla ders eklenemez.
+            <div class="alert alert-warning border-0 shadow-sm">
+                <div class="d-flex">
+                    <i class="ti ti-info-circle fs-4 me-2"></i>
+                    <div>
+                        <strong>Bilgi:</strong> Aynı öğretmen, sınıf, gün ve saat dilimi için çakışan ders eklememeye dikkat ediniz.
+                    </div>
+                </div>
             </div>
             
+            <hr class="my-4">
+            
             <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary btn-lg">
-                    <i class="ti ti-check me-2"></i>Kaydet
+                <button type="submit" class="btn btn-primary btn-lg px-5">
+                    <i class="ti ti-device-floppy me-2"></i>Kaydet
                 </button>
                 <a href="{% url 'yonetim_ders_programi' %}" class="btn btn-outline-secondary btn-lg">
-                    <i class="ti ti-x me-2"></i>İptal
+                    İptal
                 </a>
             </div>
         </form>

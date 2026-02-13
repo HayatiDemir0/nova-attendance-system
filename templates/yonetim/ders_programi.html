@@ -9,7 +9,7 @@
             <p class="mb-0">Haftalık ders programını yönetin</p>
         </div>
         <div class="col-auto">
-            <a href="{% url 'ders_programi_ekle' %}" class="btn btn-light btn-lg">
+            <a href="{% url 'ders_programi_ekle' %}" class="btn btn-light btn-lg shadow-sm">
                 <i class="ti ti-plus me-2"></i>Yeni Ders
             </a>
         </div>
@@ -20,19 +20,19 @@
     <div class="card-body">
         <form method="get" class="row g-3">
             <div class="col-md-3">
-                <label class="form-label font-weight-bold">Öğretmen</label>
+                <label class="form-label font-weight-bold text-dark">Öğretmen</label>
                 <select name="ogretmen" class="form-select">
                     <option value="">Tüm Öğretmenler</option>
                     {% for ogretmen in ogretmenler %}
                     <option value="{{ ogretmen.id }}" {% if secili_ogretmen == ogretmen.id|stringformat:"s" %}selected{% endif %}>
-                        {{ ogretmen.get_full_name }}
+                        {{ ogretmen.get_full_name|default:ogretmen.username }}
                     </option>
                     {% endfor %}
                 </select>
             </div>
             
             <div class="col-md-3">
-                <label class="form-label font-weight-bold">Sınıf</label>
+                <label class="form-label font-weight-bold text-dark">Sınıf</label>
                 <select name="sinif" class="form-select">
                     <option value="">Tüm Sınıflar</option>
                     {% for sinif in siniflar %}
@@ -44,7 +44,7 @@
             </div>
             
             <div class="col-md-3">
-                <label class="form-label font-weight-bold">Gün</label>
+                <label class="form-label font-weight-bold text-dark">Gün</label>
                 <select name="gun" class="form-select">
                     <option value="">Tüm Günler</option>
                     <option value="1" {% if secili_gun == "1" %}selected{% endif %}>Pazartesi</option>
@@ -59,7 +59,7 @@
             
             <div class="col-md-3">
                 <label class="form-label">&nbsp;</label>
-                <button type="submit" class="btn btn-primary w-100">
+                <button type="submit" class="btn btn-primary w-100 shadow-sm">
                     <i class="ti ti-search me-2"></i>Filtrele
                 </button>
             </div>
@@ -67,51 +67,62 @@
     </div>
 </div>
 
-<div class="card shadow-sm border-0">
-    <div class="card-header bg-white" style="border-bottom: 2px solid #FF9800;">
-        <h3 class="mb-0">Toplam {{ dersler.count }} Ders</h3>
+<div class="card shadow-sm border-0 overflow-hidden">
+    <div class="card-header bg-white py-3" style="border-bottom: 2px solid #FF9800;">
+        <h5 class="mb-0 text-dark">
+            <i class="ti ti-list me-2"></i>Toplam {{ dersler|length }} Ders Tanımlı
+        </h5>
     </div>
     <div class="table-responsive">
-        <table class="table table-hover mb-0">
+        <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
                 <tr>
-                    <th>#</th>
+                    <th class="ps-4">#</th>
                     <th>Gün</th>
-                    <th>Saat</th>
-                    <th>Ders Adı</th>
+                    <th>Saat Aralığı</th>
+                    <th>Ders Bilgisi</th>
                     <th>Sınıf</th>
                     <th>Öğretmen</th>
                     <th>Durum</th>
-                    <th>İşlemler</th>
+                    <th class="text-end pe-4">İşlemler</th>
                 </tr>
             </thead>
             <tbody>
                 {% for ders in dersler %}
                 <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td><strong>{{ ders.get_gun_display }}</strong></td>
+                    <td class="ps-4 text-muted">{{ forloop.counter }}</td>
+                    <td><span class="fw-bold">{{ ders.get_gun_display }}</span></td>
                     <td>
-                        <span class="badge bg-primary" style="font-size:0.85rem;">
-                            {{ ders.baslangic_saati|time:"H:i" }} - {{ ders.bitis_saati|time:"H:i" }}
+                        <span class="badge bg-soft-primary text-primary border border-primary-subtle px-2 py-1">
+                            <i class="ti ti-clock me-1"></i>{{ ders.baslangic_saati|time:"H:i" }} - {{ ders.bitis_saati|time:"H:i" }}
                         </span>
                     </td>
-                    <td><strong>{{ ders.ders_adi }}</strong></td>
-                    <td><span class="badge bg-info text-dark">{{ ders.sinif.ad }}</span></td>
-                    <td>{{ ders.ogretmen.get_full_name|default:ders.ogretmen.username }}</td>
                     <td>
-                        {% if ders.aktif %}
-                        <span class="badge bg-success">Aktif</span>
-                        {% else %}
-                        <span class="badge bg-secondary">Pasif</span>
-                        {% endif %}
+                        <div class="fw-bold text-dark">{{ ders.ders_adi }}</div>
+                    </td>
+                    <td><span class="badge rounded-pill bg-info text-dark px-3">{{ ders.sinif.ad }}</span></td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-xs me-2 bg-light rounded-circle text-center" style="width: 30px; height: 30px; line-height: 30px;">
+                                <i class="ti ti-user text-muted"></i>
+                            </div>
+                            {{ ders.ogretmen.get_full_name|default:ders.ogretmen.username }}
+                        </div>
                     </td>
                     <td>
-                        <div class="btn-group">
-                            <a href="{% url 'ders_programi_duzenle' ders.id %}" class="btn btn-sm btn-outline-primary" title="Düzenle">
-                                <i class="ti ti-edit"></i>
+                        {% if ders.aktif %}
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2">Aktif</span>
+                        {% else %}
+                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2">Pasif</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end pe-4">
+                        <div class="btn-group shadow-sm">
+                            <a href="{% url 'ders_programi_duzenle' ders.id %}" class="btn btn-sm btn-white text-primary" title="Düzenle">
+                                <i class="ti ti-edit fs-5"></i>
                             </a>
-                            <a href="{% url 'ders_programi_sil' ders.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bu dersi silmek istediğinize emin misiniz?')" title="Sil">
-                                <i class="ti ti-trash"></i>
+                            <a href="{% url 'ders_programi_sil' ders.id %}" class="btn btn-sm btn-white text-danger" onclick="return confirm('Bu dersi silmek istediğinize emin misiniz?')" title="Sil">
+                                <i class="ti ti-trash fs-5"></i>
                             </a>
                         </div>
                     </td>
@@ -119,8 +130,11 @@
                 {% empty %}
                 <tr>
                     <td colspan="8" class="text-center py-5">
-                        <i class="ti ti-calendar-off" style="font-size: 3rem; color: #dee2e6;"></i>
-                        <p class="text-muted mt-2">Ders programı bulunamadı.</p>
+                        <div class="py-4">
+                            <i class="ti ti-calendar-off text-light" style="font-size: 4rem;"></i>
+                            <p class="text-muted fs-5 mt-3">Henüz bir ders programı oluşturulmamış.</p>
+                            <a href="{% url 'ders_programi_ekle' %}" class="btn btn-primary btn-sm mt-2">Hemen Ekle</a>
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}
@@ -129,9 +143,9 @@
     </div>
 </div>
 
-<div class="mt-4">
-    <a href="{% url 'yonetim_panel' %}" class="btn btn-outline-secondary">
-        <i class="ti ti-arrow-left me-2"></i>Geri Dön
+<div class="mt-4 pb-5">
+    <a href="{% url 'yonetim_panel' %}" class="btn btn-link text-secondary ps-0">
+        <i class="ti ti-arrow-left me-2"></i>Yönetim Paneline Dön
     </a>
 </div>
 
