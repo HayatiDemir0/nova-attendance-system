@@ -10,6 +10,8 @@
         padding: 2rem;
         border-radius: 15px;
         margin-bottom: 2rem;
+        border: none;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
     }
     
     .dashboard-card h3 {
@@ -46,11 +48,6 @@
         color: #6c757d;
     }
     
-    .ders-card .badge {
-        font-size: 1rem;
-        padding: 0.5rem 1rem;
-    }
-    
     .btn-yoklama {
         font-size: 1.2rem;
         padding: 1rem 2rem;
@@ -59,30 +56,18 @@
     }
     
     .stat-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         padding: 2rem;
         border-radius: 15px;
         text-align: center;
         margin-bottom: 1.5rem;
-        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
     
-    .stat-card.purple {
-        background: linear-gradient(135deg, #7B3F9D 0%, #E91E63 100%);
-    }
-    
-    .stat-card.cyan {
-        background: linear-gradient(135deg, #00BCD4 0%, #00ACC1 100%);
-    }
-    
-    .stat-card.green {
-        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-    }
-    
-    .stat-card.orange {
-        background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
-    }
+    .stat-card.purple { background: linear-gradient(135deg, #7B3F9D 0%, #E91E63 100%); }
+    .stat-card.cyan { background: linear-gradient(135deg, #00BCD4 0%, #00ACC1 100%); }
+    .stat-card.green { background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); }
+    .stat-card.orange { background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); }
     
     .stat-card h2 {
         font-size: 3.5rem;
@@ -101,12 +86,7 @@
         border-radius: 15px;
         padding: 1.5rem;
         box-shadow: 0 3px 15px rgba(0,0,0,0.1);
-    }
-    
-    .yoklama-table h4 {
-        font-size: 1.6rem;
-        margin-bottom: 1.5rem;
-        color: #28a745;
+        margin-top: 1rem;
     }
     
     .page-header-dashboard {
@@ -118,44 +98,23 @@
         box-shadow: 0 10px 30px rgba(123, 63, 157, 0.3);
     }
     
-    .page-header-dashboard h1 {
-        font-size: 2.8rem;
-        font-weight: bold;
-        margin: 0;
-    }
-    
     .empty-state {
         text-align: center;
         padding: 4rem 2rem;
         background: #f8f9fa;
         border-radius: 15px;
     }
-    
-    .empty-state i {
-        font-size: 5rem;
-        color: #dee2e6;
-        margin-bottom: 1.5rem;
-    }
-    
-    .empty-state h4 {
-        color: #6c757d;
-        margin-bottom: 1rem;
-    }
 </style>
 
 {% if user.role == 'ogretmen' %}
 
-<!-- Öğretmen Dashboard -->
 <div class="page-header-dashboard">
-    <h1><i class="ti ti-home me-3"></i>Hoş Geldiniz, {{ user.get_full_name }}!</h1>
+    <h1><i class="ti ti-home me-3"></i>Hoş Geldiniz, {{ user.get_full_name|default:user.username }}!</h1>
     <p class="lead mb-0">Bugün {{ bugun_dersler.count }} dersiniz var</p>
 </div>
 
-<!-- Bugünkü Dersler -->
 <div class="card dashboard-card">
-    <h3>
-        <i class="ti ti-calendar-event me-2 text-primary"></i>Bugünkü Derslerim
-    </h3>
+    <h3><i class="ti ti-calendar-event me-2 text-primary"></i>Bugünkü Derslerim</h3>
     
     {% if bugun_dersler %}
         {% for ders in bugun_dersler %}
@@ -163,62 +122,54 @@
             <div class="row align-items-center">
                 <div class="col-md-7">
                     <h5>{{ ders.sinif.ad }}</h5>
-                    <p class="mb-2">
-                        <i class="ti ti-clock me-2"></i>
-                        <strong>{{ ders.baslangic_saati|slice:":5" }} - {{ ders.bitis_saati|slice:":5" }}</strong>
-                    </p>
-                    <p class="mb-0">
-                        <i class="ti ti-door me-2"></i>
-                        {% if ders.derslik %}
-                            {{ ders.derslik }}
-                        {% else %}
-                            <span class="text-muted">Derslik belirtilmemiş</span>
-                        {% endif %}
-                    </p>
+                    <p><i class="ti ti-clock me-2"></i><strong>{{ ders.baslangic_saati|time:"H:i" }} - {{ ders.bitis_saati|time:"H:i" }}</strong></p>
+                    <p><i class="ti ti-book me-2"></i>{{ ders.ders_adi }}</p>
                 </div>
                 <div class="col-md-5 text-end">
-                    <a href="{% url 'yoklama_al' ders.id %}" class="btn btn-primary btn-yoklama">
-                        <i class="ti ti-clipboard-check me-2"></i>Yoklama Al
-                    </a>
+                    {% if ders.id in alinan_ders_ids %}
+                        <button class="btn btn-success btn-yoklama" disabled>
+                            <i class="ti ti-check me-2"></i>Yoklama Alındı
+                        </button>
+                    {% else %}
+                        <a href="{% url 'yoklama_al' ders.id %}" class="btn btn-primary btn-yoklama">
+                            <i class="ti ti-clipboard-check me-2"></i>Yoklama Al
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
         {% endfor %}
     {% else %}
         <div class="empty-state">
-            <i class="ti ti-calendar-off"></i>
+            <i class="ti ti-calendar-off" style="font-size: 4rem; color: #ccc;"></i>
             <h4>Bugün için ders programınız bulunmamaktadır</h4>
-            <p class="text-muted">İyi günler dileriz!</p>
+            <p class="text-muted">İyi bir dinlenme günü dileriz!</p>
         </div>
     {% endif %}
 </div>
 
-<!-- Bugün Alınan Yoklamalar -->
 {% if bugun_yoklamalar %}
 <div class="yoklama-table">
-    <h4>
-        <i class="ti ti-check me-2"></i>Bugün Aldığım Yoklamalar
-    </h4>
-    
+    <h4 class="text-success"><i class="ti ti-circle-check me-2"></i>Bugün Aldığım Yoklamalar</h4>
     <div class="table-responsive">
         <table class="table table-hover">
             <thead>
                 <tr>
-                    <th style="font-size: 1.1rem;">Sınıf</th>
-                    <th style="font-size: 1.1rem;">Ders Konusu</th>
-                    <th style="font-size: 1.1rem;">Saat</th>
-                    <th style="font-size: 1.1rem;">İşlem</th>
+                    <th>Sınıf</th>
+                    <th>Ders Konusu</th>
+                    <th>Saat</th>
+                    <th>İşlem</th>
                 </tr>
             </thead>
             <tbody>
                 {% for yoklama in bugun_yoklamalar %}
                 <tr>
-                    <td><span class="badge bg-info" style="font-size: 1rem;">{{ yoklama.sinif.ad }}</span></td>
-                    <td style="font-size: 1.1rem;">{{ yoklama.ders_basligi }}</td>
-                    <td style="font-size: 1.1rem;">{{ yoklama.olusturma_zamani|time:"H:i" }}</td>
+                    <td><span class="badge bg-info">{{ yoklama.sinif.ad }}</span></td>
+                    <td>{{ yoklama.ders_basligi }}</td>
+                    <td>{{ yoklama.olusturma_zamani|time:"H:i" }}</td>
                     <td>
                         <a href="{% url 'yoklama_detay' yoklama.id %}" class="btn btn-sm btn-outline-primary">
-                            <i class="ti ti-eye me-1"></i>Detay
+                            <i class="ti ti-eye"></i>
                         </a>
                     </td>
                 </tr>
@@ -231,13 +182,11 @@
 
 {% else %}
 
-<!-- Admin Dashboard -->
 <div class="page-header-dashboard">
     <h1><i class="ti ti-dashboard me-3"></i>Yönetim Paneli</h1>
-    <p class="lead mb-0">Sistem özeti ve istatistikler</p>
+    <p class="lead mb-0">Genel Sistem Özeti</p>
 </div>
 
-<!-- İstatistikler -->
 <div class="row">
     <div class="col-md-3">
         <div class="stat-card purple">
@@ -259,40 +208,32 @@
     </div>
     <div class="col-md-3">
         <div class="stat-card orange">
-            <h2>{{ bugun_yoklamalar }}</h2>
+            <h2>{{ bugun_yoklama }}</h2>
             <p>Bugünkü Yoklama</p>
         </div>
     </div>
 </div>
 
-<!-- Son Yoklamalar -->
 <div class="yoklama-table">
-    <h4>
-        <i class="ti ti-clock-hour-4 me-2"></i>Son Yoklamalar
-    </h4>
-    
+    <h4><i class="ti ti-history me-2"></i>Son Yoklamalar</h4>
     <div class="table-responsive">
         <table class="table table-hover">
             <thead>
                 <tr>
-                    <th style="font-size: 1.1rem;">Tarih</th>
-                    <th style="font-size: 1.1rem;">Öğretmen</th>
-                    <th style="font-size: 1.1rem;">Sınıf</th>
-                    <th style="font-size: 1.1rem;">Ders</th>
-                    <th style="font-size: 1.1rem;">İşlem</th>
+                    <th>Tarih</th>
+                    <th>Öğretmen</th>
+                    <th>Sınıf</th>
+                    <th>İşlem</th>
                 </tr>
             </thead>
             <tbody>
                 {% for yoklama in son_yoklamalar %}
                 <tr>
-                    <td style="font-size: 1.1rem;">{{ yoklama.tarih|date:"d.m.Y" }}</td>
-                    <td style="font-size: 1.1rem;">{{ yoklama.ogretmen.get_full_name }}</td>
-                    <td><span class="badge bg-info" style="font-size: 1rem;">{{ yoklama.sinif.ad }}</span></td>
-                    <td style="font-size: 1.1rem;">{{ yoklama.ders_basligi|truncatewords:4 }}</td>
+                    <td>{{ yoklama.tarih|date:"d.m.Y" }}</td>
+                    <td>{{ yoklama.ogretmen.get_full_name }}</td>
+                    <td><span class="badge bg-secondary">{{ yoklama.sinif.ad }}</span></td>
                     <td>
-                        <a href="{% url 'yoklama_detay' yoklama.id %}" class="btn btn-sm btn-outline-primary">
-                            <i class="ti ti-eye me-1"></i>Detay
-                        </a>
+                        <a href="{% url 'yoklama_detay' yoklama.id %}" class="btn btn-sm btn-primary">Detay</a>
                     </td>
                 </tr>
                 {% endfor %}
