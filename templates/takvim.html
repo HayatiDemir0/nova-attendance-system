@@ -3,24 +3,97 @@
 
 {% block title %}Takvim - Yoklama Sistemi{% endblock %}
 
-{% block content %}  {# <--- BURAYI EKLEDİK #}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>{{ ay_adi }} {{ yil }}</h2>
-        <div>
-            <a href="{% url 'takvim' %}?yil={{ onceki_yil }}&ay={{ onceki_ay }}" class="btn btn-outline-primary">
-                <i class="bi bi-chevron-left"></i> Önceki
-            </a>
-            <a href="{% url 'takvim' %}" class="btn btn-primary">Bugün</a>
-            <a href="{% url 'takvim' %}?yil={{ sonraki_yil }}&ay={{ sonraki_ay }}" class="btn btn-outline-primary">
-                Sonraki <i class="bi bi-chevron-right"></i>
-            </a>
+{% block content %}
+<style>
+    .calendar-card {
+        border: none;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+    .calendar-table thead th {
+        background-color: #f8f9fa;
+        color: #6c757d;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+        padding: 1.5rem 0;
+        border: none;
+    }
+    .calendar-table td {
+        width: 14.28%;
+        height: 140px;
+        transition: all 0.2s ease;
+        border: 1px solid #f1f3f5 !important;
+        vertical-align: top;
+        padding: 10px;
+    }
+    .calendar-table td:hover {
+        background-color: #fffaf5;
+    }
+    .day-number {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #495057;
+        margin-bottom: 8px;
+        display: block;
+    }
+    .today {
+        background-color: #fff4e6 !important;
+        border: 2px solid #ff9800 !important;
+    }
+    .today .day-number {
+        color: #f57c00;
+    }
+    .empty-day {
+        background-color: #fafafa;
+    }
+    .yoklama-item {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        border-radius: 6px;
+        margin-bottom: 4px;
+        border-left: 3px solid #f57c00;
+        background: #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        color: #333;
+        transition: transform 0.1s;
+    }
+    .yoklama-item:hover {
+        transform: scale(1.02);
+    }
+    .calendar-nav .btn {
+        border-radius: 10px;
+        padding: 0.5rem 1.2rem;
+    }
+</style>
+
+<div class="page-header-section" style="background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); color: white; padding: 2.5rem; border-radius: 20px; margin-bottom: 2rem; box-shadow: 0 10px 20px rgba(245, 124, 0, 0.2);">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h1 class="display-5 fw-bold mb-0">
+                <i class="ti ti-calendar-stats me-3"></i>{{ ay_adi }} {{ yil }}
+            </h1>
+            <p class="opacity-75 mb-0 mt-2">Yoklama kayıtlarını aylık olarak izleyin ve yönetin.</p>
+        </div>
+        <div class="col-md-6 text-md-end mt-3 mt-md-0 calendar-nav">
+            <div class="btn-group shadow-sm bg-white rounded-3 p-1">
+                <a href="{% url 'takvim' %}?yil={{ onceki_yil }}&ay={{ onceki_ay }}" class="btn btn-light border-0">
+                    <i class="ti ti-chevron-left"></i>
+                </a>
+                <a href="{% url 'takvim' %}" class="btn btn-light border-0 fw-bold px-4">Bugün</a>
+                <a href="{% url 'takvim' %}?yil={{ sonraki_yil }}&ay={{ sonraki_ay }}" class="btn btn-light border-0">
+                    <i class="ti ti-chevron-right"></i>
+                </a>
+            </div>
         </div>
     </div>
+</div>
 
-    <div class="card">
-        <div class="card-body">
-            <table class="table table-bordered text-center">
+<div class="card calendar-card shadow-lg">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table calendar-table mb-0">
                 <thead>
                     <tr>
                         <th>Pazartesi</th>
@@ -28,29 +101,38 @@
                         <th>Çarşamba</th>
                         <th>Perşembe</th>
                         <th>Cuma</th>
-                        <th>Cumartesi</th>
-                        <th>Pazar</th>
+                        <th class="text-danger">Cumartesi</th>
+                        <th class="text-danger">Pazar</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for hafta in takvim %}
-                    <tr style="height: 120px;">
+                    <tr>
                         {% for gun in hafta %}
-                        <td class="{% if gun == bugun.day and ay == bugun.month and yil == bugun.year %}bg-primary bg-opacity-10{% endif %}">
-                            {% if gun != 0 %}
-                                <strong>{{ gun }}</strong>
-                                {% if gun in yoklamalar %}
-                                    <div class="mt-2">
-                                        {# get_item filtresinin doğru tanımlandığından emin olun #}
+                        {% if gun != 0 %}
+                            <td class="{% if gun == bugun.day and ay == bugun.month and yil == bugun.year %}today{% endif %}">
+                                <span class="day-number">{{ gun }}</span>
+                                
+                                <div class="yoklama-container">
+                                    {% if gun in yoklamalar %}
                                         {% for yoklama in yoklamalar|get_item:gun %}
-                                        <div class="badge bg-success mb-1 d-block text-wrap">
-                                            <small>{{ yoklama.sinif.ad }}</small>
+                                        <div class="yoklama-item d-flex align-items-center">
+                                            <i class="ti ti-circle-filled text-warning me-1" style="font-size: 0.5rem;"></i>
+                                            <span class="text-truncate" title="{{ yoklama.sinif.ad }}">
+                                                <strong>{{ yoklama.sinif.ad }}</strong>
+                                            </span>
                                         </div>
                                         {% endfor %}
-                                    </div>
-                                {% endif %}
-                            {% endif %}
-                        </td>
+                                        
+                                        {% if yoklamalar|get_item:gun|length > 3 %}
+                                            <small class="text-muted ps-1">+{{ yoklamalar|get_item:gun|length|add:"-3" }} daha...</small>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </td>
+                        {% else %}
+                            <td class="empty-day"></td>
+                        {% endif %}
                         {% endfor %}
                     </tr>
                     {% endfor %}
@@ -59,4 +141,16 @@
         </div>
     </div>
 </div>
-{% endblock %} 
+
+<div class="mt-4 d-flex align-items-center text-muted">
+    <div class="me-3">
+        <span class="badge bg-warning-subtle text-warning border border-warning-subtle p-2 rounded-circle me-1"></span>
+        <small>Ders Kaydı Mevcut</small>
+    </div>
+    <div>
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle p-2 rounded-circle me-1"></span>
+        <small>Bugün</small>
+    </div>
+</div>
+
+{% endblock %}
