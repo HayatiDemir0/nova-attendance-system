@@ -123,6 +123,32 @@ def takvim(request):
         'sonraki_yil': sonraki_yil,
     }
     return render(request, 'takvim.html', context)
+@login_required
+def ders_programi_ekle(request):
+    """Ders Ekleme Mantığını Güçlendiriyoruz"""
+    if request.user.role != 'admin':
+        return redirect('dashboard')
+        
+    if request.method == 'POST':
+        try:
+            DersProgrami.objects.create(
+                ders_adi=request.POST.get('ders_adi'),
+                gun=request.POST.get('gun'),
+                baslangic_saati=request.POST.get('baslangic_saati'),
+                bitis_saati=request.POST.get('bitis_saati'),
+                ogretmen_id=request.POST.get('ogretmen'),
+                sinif_id=request.POST.get('sinif'),
+                aktif=request.POST.get('aktif') == 'on'
+            )
+            messages.success(request, 'Ders başarıyla eklendi!')
+            return redirect('yonetim_ders_programi')
+        except Exception as e:
+            messages.error(request, f'Hata oluştu: {e}')
+            
+    return render(request, 'ders/ekle.html', {
+        'ogretmenler': User.objects.filter(role='ogretmen'),
+        'siniflar': Sinif.objects.all()
+    })
 # ==================== ADMİN PANELİ ====================
 
 @login_required
@@ -503,7 +529,7 @@ def ders_programi_ekle(request):
         )
         messages.success(request, 'Ders programı eklendi!')
         return redirect('yonetim_ders_programi')
-    return render(request, 'ders/ekle.html', {'ogretmenler': ogretmenler, 'siniflar': siniflar})
+    return render(request, 'ders_programi/ekle.html', {'ogretmenler': ogretmenler, 'siniflar': siniflar})
 
 @login_required
 def ders_programi_duzenle(request, pk):
@@ -522,7 +548,7 @@ def ders_programi_duzenle(request, pk):
         ders.save()
         messages.success(request, 'Ders programı güncellendi!')
         return redirect('yonetim_ders_programi')
-    return render(request, 'ders/duzenle.html', {'ders': ders, 'ogretmenler': ogretmenler, 'siniflar': siniflar})
+    return render(request, 'ders_programi/duzenle.html', {'ders': ders, 'ogretmenler': ogretmenler, 'siniflar': siniflar})
 
 @login_required
 def ders_programi_sil(request, pk):
@@ -563,7 +589,7 @@ def ogrenci_not_ekle(request, pk):
         )
         messages.success(request, 'Not eklendi!')
         return redirect('ogrenci_detay', pk=pk)
-    return render(request, 'yonetim/ogrenci_not_ekle.html', {'ogrenci': ogrenci, 'bugun': timezone.now().date()})
+    return render(request, 'ogrenciler/ogrenci_not_ekle.html', {'ogrenci': ogrenci, 'bugun': timezone.now().date()})
 
 @login_required
 def ogrenci_not_duzenle(request, pk):
@@ -573,7 +599,7 @@ def ogrenci_not_duzenle(request, pk):
         ogrenci_notu.aciklama = request.POST.get('aciklama')
         ogrenci_notu.save()
         return redirect('ogrenci_detay', pk=ogrenci_notu.ogrenci.id)
-    return render(request, 'yonetim/ogrenci_not_duzenle.html', {'ogrenci_notu': ogrenci_notu})
+    return render(request, 'ogrenciler/ogrenci_not_duzenle.html', {'ogrenci_notu': ogrenci_notu})
 
 @login_required
 def ogrenci_not_sil(request, pk):
