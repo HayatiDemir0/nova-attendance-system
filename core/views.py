@@ -13,7 +13,7 @@ def login_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
     # Buraya giriş mantığını veya formunu eklemelisin
-    return render(request, 'registration/login.html')
+    return render(request, 'registration/base.html')
 
 def register_view(request):
     """Kayıt Sayfası"""
