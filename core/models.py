@@ -48,8 +48,10 @@ class Ogrenci(models.Model):
     dogum_tarihi = models.DateField()
     cinsiyet = models.CharField(max_length=1, choices=CINSIYET_CHOICES)
     sinif = models.ForeignKey(Sinif, on_delete=models.CASCADE, related_name='ogrenciler')
+    fotograf = models.ImageField(upload_to='ogrenciler/', blank=True, null=True) # EKLENDİ
     veli_adi = models.CharField(max_length=100)
     veli_telefon = models.CharField(max_length=15)
+    veli_email = models.EmailField(max_length=100, blank=True, null=True) # EKLENDİ
     adres = models.TextField(blank=True)
     kayit_tarihi = models.DateTimeField(auto_now_add=True)
     aktif = models.BooleanField(default=True)
@@ -141,8 +143,6 @@ class YoklamaDetay(models.Model):
         return f"{self.ogrenci.tam_ad} - {self.durum}"
 
 class OgrenciNotu(models.Model):
-    """Öğrenci Notları ve Yorumlar"""
-    
     KATEGORI_CHOICES = [
         ('tatil', 'Tatil/İzin'),
         ('disiplin', 'Disiplin'),
@@ -170,7 +170,6 @@ class OgrenciNotu(models.Model):
         return f"{self.ogrenci.tam_ad} - {self.baslik} ({self.tarih})"
     
     def get_kategori_icon(self):
-        """Kategori ikonu"""
         icons = {
             'tatil': 'ti-beach',
             'disiplin': 'ti-alert-triangle',
@@ -181,7 +180,6 @@ class OgrenciNotu(models.Model):
         return icons.get(self.kategori, 'ti-note')
     
     def get_kategori_color(self):
-        """Kategori rengi"""
         colors = {
             'tatil': 'info',
             'disiplin': 'danger',
