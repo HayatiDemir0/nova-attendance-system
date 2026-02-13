@@ -5,6 +5,8 @@ from django.utils import timezone
 from django.db.models import Q, Count
 from django.contrib.auth import authenticate, login, logout
 from .models import User, Sinif, Ogrenci, DersProgrami, Yoklama, OgrenciNotu, YoklamaDetay
+import calendar
+from datetime import datetime
 
 # ==================== GENEL VE KİMLİK DOĞRULAMA ====================
 
@@ -74,9 +76,53 @@ def dashboard(request):
 
 @login_required
 def takvim(request):
-    """Takvim Görünümü"""
-    return render(request, 'takvim.html')
+    """Gelişmiş Takvim Görünümü Mantığı"""
+    bugun = timezone.now().date()
+    yil = int(request.GET.get('yil', bugun.year))
+    ay = int(request.GET.get('ay', bugun.month))
 
+    # Takvim verilerini oluştur
+    cal = calendar.Calendar(firstweekday=0)  # Pazartesi ile başla
+    ay_takvimi = cal.monthdayscalendar(yil, ay)
+    
+    # O aya ait yoklamaları çek
+    yoklamalar_sorgu = Yoklama.objects.filter(
+        tarih__year=yil, 
+        tarih__month=ay
+    ).select_related('sinif')
+
+    # Yoklamaları günlere göre grupla (Template'deki get_item filtresi için)
+    yoklamalar_dict = {}
+    for y in yoklamalar_sorgu:
+        gun = y.tarih.day
+        if gun not in yoklamalar_dict:
+            yoklamalar_dict[gun] = []
+        yoklamalar_dict[gun].append(y)
+
+    # Navigasyon (Önceki/Sonraki ay)
+    onceki_ay = ay - 1 if ay > 1 else 12
+    onceki_yil = yil if ay > 1 else yil - 1
+    sonraki_ay = ay + 1 if ay < 12 else 1
+    sonraki_yil = yil if ay < 12 else yil + 1
+
+    aylar = [
+        "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+        "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
+    ]
+
+    context = {
+        'takvim': ay_takvimi,
+        'yoklamalar': yoklamalar_dict,
+        'ay': ay,
+        'yil': yil,
+        'ay_adi': aylar[ay-1],
+        'bugun': bugun,
+        'onceki_ay': onceki_ay,
+        'onceki_yil': onceki_yil,
+        'sonraki_ay': sonraki_ay,
+        'sonraki_yil': sonraki_yil,
+    }
+    return render(request, 'takvim.html', context)
 # ==================== ADMİN PANELİ ====================
 
 @login_required
