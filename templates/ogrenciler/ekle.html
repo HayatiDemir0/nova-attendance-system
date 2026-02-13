@@ -1,13 +1,18 @@
 {% extends 'base.html' %}
-
-{% block title %}Öğrenci Ekle - Yoklama Sistemi{% endblock %}
-
+{% block title %}Öğrenci Ekle{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Yeni Öğrenci Ekle</h2>
-    <a href="{% url 'ogrenci_listesi' %}" class="btn btn-secondary">
-        <i class="bi bi-arrow-left"></i> Geri
-    </a>
+
+<div class="page-header-section" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+    <div class="row align-items-center">
+        <div class="col">
+            <h1><i class="ti ti-plus me-3"></i>Yeni Öğrenci Ekle</h1>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'yonetim_ogrenciler' %}" class="btn btn-light btn-lg">
+                <i class="ti ti-arrow-left me-2"></i>Geri
+            </a>
+        </div>
+    </div>
 </div>
 
 <div class="card">
@@ -15,78 +20,97 @@
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             
-            <h5 class="mb-3">Öğrenci Bilgileri</h5>
+            <h4 class="mb-3">Öğrenci Bilgileri</h4>
+            
             <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Ad</label>
-                    {{ form.ad }}
-                    {% if form.ad.errors %}<div class="text-danger small">{{ form.ad.errors }}</div>{% endif %}
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Ad <span class="text-danger">*</span></label>
+                    <input type="text" name="ad" class="form-control" placeholder="Öğrenci adı" required>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Soyad</label>
-                    {{ form.soyad }}
-                    {% if form.soyad.errors %}<div class="text-danger small">{{ form.soyad.errors }}</div>{% endif %}
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">TC Kimlik No</label>
-                    {{ form.tc_kimlik }}
-                    {% if form.tc_kimlik.errors %}<div class="text-danger small">{{ form.tc_kimlik.errors }}</div>{% endif %}
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Soyad <span class="text-danger">*</span></label>
+                    <input type="text" name="soyad" class="form-control" placeholder="Öğrenci soyadı" required>
                 </div>
             </div>
             
             <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Doğum Tarihi</label>
-                    {{ form.dogum_tarihi }}
-                    {% if form.dogum_tarihi.errors %}<div class="text-danger small">{{ form.dogum_tarihi.errors }}</div>{% endif %}
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">TC Kimlik <span class="text-danger">*</span></label>
+                    <input type="text" name="tc_kimlik" class="form-control" placeholder="12345678901" maxlength="11" minlength="11" required>
+                    <small class="text-muted">11 haneli TC Kimlik numarası</small>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Cinsiyet</label>
-                    {{ form.cinsiyet }}
-                    {% if form.cinsiyet.errors %}<div class="text-danger small">{{ form.cinsiyet.errors }}</div>{% endif %}
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Sınıf</label>
-                    {{ form.sinif }}
-                    {% if form.sinif.errors %}<div class="text-danger small">{{ form.sinif.errors }}</div>{% endif %}
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Doğum Tarihi <span class="text-danger">*</span></label>
+                    <input type="date" name="dogum_tarihi" class="form-control" required>
                 </div>
             </div>
             
-            <h5 class="mb-3 mt-4">Veli Bilgileri</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Cinsiyet <span class="text-danger">*</span></label>
+                    <select name="cinsiyet" class="form-select" required>
+                        <option value="">Seçiniz...</option>
+                        <option value="E">Erkek</option>
+                        <option value="K">Kız</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Sınıf <span class="text-danger">*</span></label>
+                    <select name="sinif" class="form-select" required>
+                        <option value="">Sınıf seçiniz...</option>
+                        {% for sinif in siniflar %}
+                        <option value="{{ sinif.id }}">{{ sinif.ad }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <hr class="my-4">
+            
+            <h4 class="mb-3">Veli Bilgileri</h4>
+            
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Veli Adı</label>
-                    {{ form.veli_adi }}
-                    {% if form.veli_adi.errors %}<div class="text-danger small">{{ form.veli_adi.errors }}</div>{% endif %}
+                    <input type="text" name="veli_adi" class="form-control" placeholder="Veli adı soyadı">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Veli Telefon</label>
-                    {{ form.veli_telefon }}
-                    {% if form.veli_telefon.errors %}<div class="text-danger small">{{ form.veli_telefon.errors }}</div>{% endif %}
+                    <input type="text" name="veli_telefon" class="form-control" placeholder="0555 123 45 67">
                 </div>
             </div>
-            
+
+            <div class="mb-3">
+                <label class="form-label">Veli Email</label>
+                <input type="email" name="veli_email" class="form-control" placeholder="veli@email.com">
+            </div>
+
             <div class="mb-3">
                 <label class="form-label">Adres</label>
-                {{ form.adres }}
+                <textarea name="adres" class="form-control" rows="3" placeholder="Ev adresi (opsiyonel)"></textarea>
             </div>
             
             <div class="mb-3">
-                <label class="form-label">Profil Resmi</label>
-                {{ form.profil_resmi }}
+                <label class="form-label">Fotoğraf</label>
+                <input type="file" name="fotograf" class="form-control" accept="image/*">
+                <small class="text-muted">Öğrenci fotoğrafı (opsiyonel)</small>
             </div>
             
-            <div class="form-check mb-3">
-                {{ form.aktif }}
-                <label class="form-check-label">Aktif</label>
+            <div class="alert alert-info">
+                <i class="ti ti-info-circle me-2"></i>
+                <strong>Not:</strong> Yıldız (*) ile işaretli alanlar zorunludur.
             </div>
             
-            <div class="text-end">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-circle"></i> Kaydet
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="ti ti-check me-2"></i>Kaydet
                 </button>
+                <a href="{% url 'yonetim_ogrenciler' %}" class="btn btn-outline-secondary btn-lg">
+                    <i class="ti ti-x me-2"></i>İptal
+                </a>
             </div>
         </form>
     </div>
 </div>
+
 {% endblock %}
