@@ -9,65 +9,82 @@ import calendar
 from datetime import datetime
 from .models import User, Sinif, Ogrenci, DersProgrami, Yoklama, OgrenciNotu, YoklamaDetay
 
-# ==================== GENEL VE KİMLİK DOĞRULAMA ====================
+# ==================== KİMLİK DOĞRULAMA ====================
 
 def login_view(request):
-    """Giriş Sayfası"""
     if request.user.is_authenticated:
         return redirect('dashboard')
-    
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
-        
         if user is not None:
             login(request, user)
-            messages.success(request, f'Hoş geldiniz, {user.get_full_name() or user.username}!')
+            messages.success(request, f'Hoş geldiniz!')
             return redirect('dashboard')
         else:
             messages.error(request, 'Kullanıcı adı veya şifre hatalı!')
     return render(request, 'login.html')
 
 def logout_view(request):
-    """Çıkış İşlemi"""
     logout(request)
     messages.success(request, 'Başarıyla çıkış yaptınız!')
     return redirect('login')
+
+def register_view(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    return render(request, 'register.html')
+
+# ==================== DASHBOARD VE TAKVİM ====================
 
 @login_required
 def dashboard(request):
     if request.user.role == 'admin':
         return redirect('yonetim_panel')
     
-    context = {}
     bugun = timezone.now().date()
     gun_index = bugun.isoweekday() 
     
-    context['bugun_dersler'] = DersProgrami.objects.filter(
-        ogretmen=request.user,
-        gun__in=[str(gun_index), gun_index],
-        aktif=True
+    bugun_dersler = DersProgrami.objects.filter(
+        ogretmen=request.user, gun__in=[str(gun_index), gun_index], aktif=True
     ).select_related('sinif').order_by('baslangic_saati')
     
-    context['bugun_yoklamalar'] = Yoklama.objects.filter(
-        ogretmen=request.user,
-        tarih=bugun
-    ).select_related('sinif', 'ders_programi')
+    bugun_yoklamalar = Yoklama.objects.filter(ogretmen=request.user, tarih=bugun)
+    alinan_ders_ids = list(bugun_yoklamalar.values_list('ders_programi_id', flat=True))
     
-    context['alinan_ders_ids'] = list(context['bugun_yoklamalar'].values_list('ders_programi_id', flat=True))
-    context['siniflar'] = Sinif.objects.filter(ders_programlari__ogretmen=request.user).distinct()
-    context['bugun'] = bugun
-    return render(request, 'dashboard.html', context)
+    return render(request, 'dashboard.html', {
+        'bugun_dersler': bugun_dersler,
+        'bugun_yoklamalar': bugun_yoklamalar,
+        'alinan_ders_ids': alinan_ders_ids,
+        'bugun': bugun
+    })
 
-# ==================== ADMİN PANELİ VE LİSTELEME ====================
+@login_required
+def takvim(request):
+    bugun = timezone.now().date()
+    yil = int(request.GET.get('yil', bugun.year))
+    ay = int(request.GET.get('ay', bugun.month))
+    cal = calendar.Calendar(firstweekday=0)
+    ay_takvimi = cal.monthdayscalendar(yil, ay)
+    yoklamalar = Yoklama.objects.filter(tarih__year=yil, tarih__month=ay)
+    
+    yoklamalar_dict = {}
+    for y in yoklamalar:
+        gun = y.tarih.day
+        if gun not in yoklamalar_dict: yoklamalar_dict[gun] = []
+        yoklamalar_dict[gun].append(y)
+
+    aylar = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
+    return render(request, 'takvim.html', {
+        'takvim': ay_takvimi, 'yoklamalar': yoklamalar_dict, 'ay': ay, 'yil': yil, 'ay_adi': aylar[ay-1]
+    })
+
+# ==================== ADMİN YÖNETİM SAYFALARI ====================
 
 @login_required
 def yonetim_panel(request):
-    if request.user.role != 'admin':
-        messages.error(request, 'Bu sayfaya erişim yetkiniz yok!')
-        return redirect('dashboard')
-    
+    if request.user.role != 'admin': return redirect('dashboard')
     context = {
         'toplam_ogretmen': User.objects.filter(role='ogretmen').count(),
         'toplam_sinif': Sinif.objects.count(),
@@ -79,36 +96,48 @@ def yonetim_panel(request):
 
 @login_required
 def yonetim_yoklamalar(request):
-    """Filtrelemeli ve Sayfalamalı Yoklama Listesi"""
-    if request.user.role != 'admin':
-        return redirect('dashboard')
+    if request.user.role != 'admin': return redirect('dashboard')
+    yoklamalar_list = Yoklama.objects.select_related('ogretmen', 'sinif').order_by('-tarih', '-id')
     
-    yoklamalar_sorgu = Yoklama.objects.select_related('ogretmen', 'sinif').order_by('-tarih', '-id')
+    paginator = Paginator(yoklamalar_list, 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
     
-    # Filtreleme Parametreleri
-    ogretmen_id = request.GET.get('ogretmen')
-    sinif_id = request.GET.get('sinif')
-    tarih = request.GET.get('tarih')
-
-    if ogretmen_id: yoklamalar_sorgu = yoklamalar_sorgu.filter(ogretmen_id=ogretmen_id)
-    if sinif_id: yoklamalar_sorgu = yoklamalar_sorgu.filter(sinif_id=sinif_id)
-    if tarih: yoklamalar_sorgu = yoklamalar_sorgu.filter(tarih=tarih)
-
-    # Sayfalama
-    paginator = Paginator(yoklamalar_sorgu, 10)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
     return render(request, 'yonetim/yoklamalar.html', {
         'yoklamalar': page_obj,
         'ogretmenler': User.objects.filter(role='ogretmen'),
-        'siniflar': Sinif.objects.all(),
-        'secili_ogretmen': ogretmen_id,
-        'secili_sinif': sinif_id,
-        'secili_tarih': tarih
+        'siniflar': Sinif.objects.all()
     })
 
-# ==================== YOKLAMA SİSTEMİ (KRİTİK) ====================
+@login_required
+def yonetim_ogretmenler(request):
+    if request.user.role != 'admin': return redirect('dashboard')
+    ogretmenler = User.objects.filter(role='ogretmen')
+    return render(request, 'yonetim/ogretmenler.html', {'ogretmenler': ogretmenler})
+
+@login_required
+def yonetim_siniflar(request):
+    if request.user.role != 'admin': return redirect('dashboard')
+    siniflar = Sinif.objects.annotate(ogrenci_sayisi=Count('ogrenciler'))
+    return render(request, 'yonetim/siniflar.html', {'siniflar': siniflar})
+
+@login_required
+def yonetim_ogrenciler(request):
+    if request.user.role != 'admin': return redirect('dashboard')
+    ogrenciler = Ogrenci.objects.select_related('sinif').all()
+    return render(request, 'yonetim/ogrenciler.html', {'ogrenciler': ogrenciler})
+
+@login_required
+def yonetim_ders_programi(request):
+    if request.user.role != 'admin': return redirect('dashboard')
+    dersler = DersProgrami.objects.select_related('ogretmen', 'sinif').all()
+    return render(request, 'yonetim/ders_programi.html', {'dersler': dersler})
+
+@login_required
+def yonetim_ayarlar(request):
+    if request.user.role != 'admin': return redirect('dashboard')
+    return render(request, 'yonetim/ayarlar.html', {'toplam_yoklama': Yoklama.objects.count()})
+
+# ==================== YOKLAMA İŞLEMLERİ (3 KELİME KURALI) ====================
 
 @login_required
 def yoklama_al(request, ders_id):
@@ -117,136 +146,81 @@ def yoklama_al(request, ders_id):
     
     if request.method == 'POST':
         ders_basligi = request.POST.get('ders_basligi', '').strip()
-        
-        # --- TAM 3 KELİME KONTROLÜ ---
         if len(ders_basligi.split()) != 3:
-            messages.error(request, f"Hata: Ders konusu tam 3 kelime olmalıdır! (Girdiğiniz: {len(ders_basligi.split())})")
+            messages.error(request, "Ders konusu tam 3 kelime olmalı!")
             return render(request, 'yoklama/al.html', {'ders': ders, 'ogrenciler': ogrenciler, 'hata_baslik': ders_basligi})
 
         yoklama = Yoklama.objects.create(
             ders_programi=ders, ders_basligi=ders_basligi,
             ogretmen=request.user, sinif=ders.sinif, tarih=timezone.now().date()
         )
-
         for ogrenci in ogrenciler:
             durum = request.POST.get(f'durum_{ogrenci.id}', 'var')
-            not_alani = request.POST.get(f'not_{ogrenci.id}', '')
-            YoklamaDetay.objects.create(yoklama=yoklama, ogrenci=ogrenci, durum=durum, not_durumu=not_alani)
+            YoklamaDetay.objects.create(yoklama=yoklama, ogrenci=ogrenci, durum=durum)
         
-        messages.success(request, 'Yoklama başarıyla sisteme işlendi.')
+        messages.success(request, 'Yoklama kaydedildi.')
         return redirect('dashboard')
-
     return render(request, 'yoklama/al.html', {'ders': ders, 'ogrenciler': ogrenciler})
 
 @login_required
 def yoklama_duzenle(request, pk):
-    """Adminin yoklamaları ana sayfaya atılmadan düzenlemesini sağlar"""
     yoklama = get_object_or_404(Yoklama, pk=pk)
-    
     if request.user.role != 'admin' and yoklama.ogretmen != request.user:
-        messages.error(request, "Bu işlemi yapmaya yetkiniz yok!")
         return redirect('dashboard')
 
     detaylar = yoklama.detaylar.all().select_related('ogrenci')
-
     if request.method == 'POST':
         ders_basligi = request.POST.get('ders_basligi', '').strip()
-        
-        # --- TAM 3 KELİME KONTROLÜ (DÜZENLEMEDE DE GEÇERLİ) ---
         if len(ders_basligi.split()) != 3:
-            messages.error(request, "Hata: Ders başlığı tam 3 kelime olmalıdır!")
+            messages.error(request, "Ders konusu tam 3 kelime olmalı!")
             return render(request, 'yoklama/duzenle.html', {'yoklama': yoklama, 'detaylar': detaylar})
 
         yoklama.ders_basligi = ders_basligi
         yoklama.save()
-
         for detay in detaylar:
             detay.durum = request.POST.get(f'durum_{detay.ogrenci.id}')
-            detay.not_durumu = request.POST.get(f'not_{detay.ogrenci.id}')
             detay.save()
-
-        messages.success(request, "Yoklama başarıyla güncellendi.")
+        messages.success(request, "Yoklama güncellendi.")
         return redirect('yonetim_yoklamalar')
-
     return render(request, 'yoklama/duzenle.html', {'yoklama': yoklama, 'detaylar': detaylar})
 
 @login_required
 def yoklama_detay(request, pk):
     yoklama = get_object_or_404(Yoklama, pk=pk)
-    detaylar = yoklama.detaylar.all().select_related('ogrenci')
-    istatistik = {
-        'toplam': detaylar.count(),
-        'var': detaylar.filter(durum='var').count(),
-        'yok': detaylar.filter(durum='yok').count(),
-        'izinli': detaylar.filter(durum='izinli').count(),
-    }
+    detaylar = yoklama.detaylar.all()
+    istatistik = {'toplam': detaylar.count(), 'var': detaylar.filter(durum='var').count()}
     return render(request, 'yoklama/detay.html', {'yoklama': yoklama, 'detaylar': detaylar, 'istatistik': istatistik})
 
-# ==================== ÖĞRENCİ VE DİĞER İŞLEMLER ====================
-
-@login_required
-def ogrenci_not_ekle(request, ogrenci_id):
-    if request.method == 'POST':
-        ogrenci = get_object_or_404(Ogrenci, id=ogrenci_id)
-        aciklama = request.POST.get('aciklama', '').strip()
-        if len(aciklama.split()) < 5:
-            messages.error(request, "Not çok kısa! En az 5 kelime yazmalısınız.")
-            return redirect('ogrenci_detay', pk=ogrenci_id)
-            
-        OgrenciNotu.objects.create(
-            ogrenci=ogrenci, olusturan=request.user,
-            baslik=request.POST.get('baslik'), aciklama=aciklama, tarih=timezone.now().date()
-        )
-        messages.success(request, "Not eklendi.")
-    return redirect('ogrenci_detay', pk=ogrenci_id)
+# ==================== SİLME İŞLEMLERİ ====================
 
 @login_required
 def ogretmen_sil(request, pk):
-    if request.user.role == 'admin':
-        User.objects.filter(pk=pk).delete()
-        messages.success(request, "Öğretmen silindi.")
+    if request.user.role == 'admin': User.objects.filter(pk=pk).delete()
     return redirect('yonetim_ogretmenler')
 
 @login_required
 def sinif_sil(request, pk):
-    if request.user.role == 'admin':
-        Sinif.objects.filter(pk=pk).delete()
-        messages.success(request, "Sınıf silindi.")
+    if request.user.role == 'admin': Sinif.objects.filter(pk=pk).delete()
     return redirect('yonetim_siniflar')
 
-def register_view(request):
-    """Kayıt Sayfası (Geçici veya Kalıcı)"""
-    if request.user.is_authenticated:
-        return redirect('dashboard')
-    # Eğer hazır bir register formun yoksa şimdilik sadece render eder
-    return render(request, 'register.html')
-
-# Views dosyanın en altına bunları ekleyebilirsin:
-
-def register_view(request):
-    return render(request, 'register.html')
+@login_required
+def ogrenci_sil(request, pk):
+    if request.user.role == 'admin': Ogrenci.objects.filter(pk=pk).delete()
+    return redirect('yonetim_ogrenciler')
 
 @login_required
-def takvim(request):
-    # Takvim fonksiyonu yukarıda yoksa diye:
-    return render(request, 'takvim.html')
+def ders_programi_sil(request, pk):
+    if request.user.role == 'admin': DersProgrami.objects.filter(pk=pk).delete()
+    return redirect('yonetim_ders_programi')
 
+# ==================== DÜZENLEME REDIRECT'LERİ (BOŞ KALMAMASI İÇİN) ====================
 @login_required
-def yonetim_ogretmenler(request):
-    ogretmenler = User.objects.filter(role='ogretmen')
-    return render(request, 'yonetim/ogretmenler.html', {'ogretmenler': ogretmenler})
-
+def ogretmen_duzenle(request, pk): return redirect('yonetim_ogretmenler')
 @login_required
-def yonetim_siniflar(request):
-    siniflar = Sinif.objects.all()
-    return render(request, 'yonetim/siniflar.html', {'siniflar': siniflar})
-
+def sinif_duzenle(request, pk): return redirect('yonetim_siniflar')
 @login_required
-def yonetim_ogrenciler(request):
-    ogrenciler = Ogrenci.objects.all()
-    return render(request, 'yonetim/ogrenciler.html', {'ogrenciler': ogrenciler})
-
+def ogrenci_duzenle(request, pk): return redirect('yonetim_ogrenciler')
 @login_required
-def yonetim_ders_programi(request):
-    dersler = DersProgrami.objects.all()
-    return render(request, 'yonetim/ders_programi.html', {'dersler': dersler})
+def ders_programi_duzenle(request, pk): return redirect('yonetim_ders_programi')
+@login_required
+def ogrenci_detay(request, pk): return render(request, 'ogrenciler/ogrenci_detay.html', {'ogrenci': get_object_or_404(Ogrenci, pk=pk)})
