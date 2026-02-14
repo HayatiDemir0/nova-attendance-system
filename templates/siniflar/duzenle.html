@@ -1,33 +1,43 @@
 {% extends 'base.html' %}
-
 {% block title %}Sınıf Düzenle - Yoklama Sistemi{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Sınıfı Düzenle: {{ sinif.ad }}</h2>
-    <a href="{% url 'yonetim_siniflar' %}" class="btn btn-secondary">
-        <i class="bi bi-arrow-left"></i> Geri
-    </a>
+<div style="background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); color: white; padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+    <div class="row align-items-center">
+        <div class="col">
+            <h1><i class="ti ti-edit me-3"></i>Sınıf Düzenle</h1>
+            <p class="mb-0">"{{ sinif.ad }}" sınıfının bilgilerini güncelliyorsunuz.</p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'yonetim_siniflar' %}" class="btn btn-light shadow-sm">
+                <i class="ti ti-arrow-left me-2"></i>Geri Dön
+            </a>
+        </div>
+    </div>
 </div>
 
-<div class="card shadow">
-    <div class="card-body">
+<div class="card shadow-sm border-0">
+    <div class="card-body p-4">
         <form method="post">
             {% csrf_token %}
             
-            <div class="mb-3">
-                <label class="form-label fw-bold">Sınıf Adı</label>
-                <input type="text" name="ad" class="form-control" value="{{ sinif.ad }}" required>
+            <div class="mb-4">
+                <label class="form-label fw-bold text-dark fs-5">Sınıf Adı</label>
+                <input type="text" name="ad" class="form-control form-control-lg border-2" 
+                       value="{{ sinif.ad }}" required style="border-color: #eee;">
             </div>
-            
-            <div class="mb-3">
-                <label class="form-label fw-bold">Açıklama</label>
-                <textarea name="aciklama" class="form-control" rows="3">{{ sinif.aciklama }}</textarea>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold text-dark fs-5">Açıklama / Not</label>
+                <textarea name="aciklama" class="form-control border-2" rows="4" 
+                          style="border-color: #eee;">{{ sinif.aciklama }}</textarea>
             </div>
-            
-            <div class="text-end">
-                <button type="submit" class="btn btn-success">
-                    <i class="bi bi-save"></i> Değişiklikleri Kaydet
+
+            <hr class="my-4">
+
+            <div class="d-flex justify-content-end align-items-center">
+                <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm">
+                    <i class="ti ti-device-floppy me-2"></i>Değişiklikleri Kaydet
                 </button>
             </div>
         </form>

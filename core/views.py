@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, login, logout
 from .models import User, Sinif, Ogrenci, DersProgrami, Yoklama, OgrenciNotu, YoklamaDetay
 import calendar
 from datetime import datetime
+from .models import Sinif, DersProgrami, OgrenciNot  # OgrenciNot burada ekli olmalı
 
 # ==================== GENEL VE KİMLİK DOĞRULAMA ====================
 
@@ -551,32 +552,25 @@ def ders_programi_duzenle(request, pk):
     ders = get_object_or_404(DersProgrami, pk=pk)
     
     if request.method == 'POST':
-        # Formdan gelen verileri al
-        ders_adi = request.POST.get('ders_adi')
-        gun = request.POST.get('gun')
-        baslangic = request.POST.get('baslangic_saati')
-        bitis = request.POST.get('bitis_saati')
-        ogretmen_id = request.POST.get('ogretmen')
-        sinif_id = request.POST.get('sinif')
-
-        # Eğer temel veriler boş gelirse işlemi durdur
-        if not all([ders_adi, gun, baslangic, bitis, ogretmen_id, sinif_id]):
-            messages.error(request, "Lütfen tüm zorunlu alanları doldurun!")
-        else:
-            ders.ders_adi = ders_adi
-            ders.gun = gun
-            ders.baslangic_saati = baslangic
-            ders.bitis_saati = bitis
-            ders.ogretmen_id = ogretmen_id
-            ders.sinif_id = sinif_id
-            ders.aktif = True if request.POST.get('aktif') == 'on' else False
+        # Manuel olarak verileri çekiyoruz (Form nesnesi kullanmadan)
+        ders.ders_adi = request.POST.get('ders_adi')
+        ders.gun = request.POST.get('gun')
+        ders.baslangic_saati = request.POST.get('baslangic_saati')
+        ders.bitis_saati = request.POST.get('bitis_saati')
+        ders.ogretmen_id = request.POST.get('ogretmen')
+        ders.sinif_id = request.POST.get('sinif')
+        ders.aktif = True if request.POST.get('aktif') == 'on' else False
+        
+        if ders.ders_adi and ders.gun:
             ders.save()
-            messages.success(request, 'Ders programı başarıyla güncellendi!')
+            messages.success(request, 'Ders başarıyla güncellendi!')
             return redirect('yonetim_ders_programi')
-    
+        else:
+            messages.error(request, 'Lütfen zorunlu alanları doldurun.')
+            
     return render(request, 'ders_programi/duzenle.html', {
-        'ders': ders, 
-        'ogretmenler': User.objects.filter(role='ogretmen'), 
+        'ders': ders,
+        'ogretmenler': User.objects.filter(role='ogretmen'),
         'siniflar': Sinif.objects.all()
     })
 
@@ -622,18 +616,53 @@ def ogrenci_not_ekle(request, pk):
     return render(request, 'ogrenciler/ogrenci_not_ekle.html', {'ogrenci': ogrenci, 'bugun': timezone.now().date()})
 
 @login_required
-def ogrenci_not_duzenle(request, pk):
-    ogrenci_notu = get_object_or_404(OgrenciNotu, pk=pk)
+def ogrenci_not_ekle(request, ogrenci_id):
+    if request.user.role not in ['admin', 'ogretmen']:
+        return redirect('dashboard')
+        
+    ogrenci = get_object_or_404(User, id=ogrenci_id, role='ogrenci')
+    dersler = DersProgrami.objects.filter(aktif=True) # veya okulun ders listesi
+    
     if request.method == 'POST':
-        ogrenci_notu.baslik = request.POST.get('baslik')
-        ogrenci_notu.aciklama = request.POST.get('aciklama')
-        ogrenci_notu.save()
-        return redirect('ogrenci_detay', pk=ogrenci_notu.ogrenci.id)
-    return render(request, 'ogrenciler/ogrenci_not_duzenle.html', {'ogrenci_notu': ogrenci_notu})
+        puan = request.POST.get('puan')
+        ders_id = request.POST.get('ders')
+        not_tipi = request.POST.get('not_tipi')
+        aciklama = request.POST.get('aciklama')
+        
+        if puan and ders_id:
+            # Not modelinizin ismine göre burayı güncelleyin (Not veya OgrenciNot)
+            OgrenciNot.objects.create(
+                ogrenci=ogrenci,
+                ders_id=ders_id,
+                puan=puan,
+                not_tipi=not_tipi,
+                aciklama=aciklama,
+                ogretmen=request.user
+            )
+            messages.success(request, f'{ogrenci.get_full_name()} için not eklendi.')
+            return redirect('ogrenci_detay', pk=ogrenci_id)
+            
+    return render(request, 'ogrenciler/ogrenci_not_ekle.html', {
+        'ogrenci': ogrenci,
+        'dersler': dersler
+    })
 
 @login_required
-def ogrenci_not_sil(request, pk):
-    ogrenci_notu = get_object_or_404(OgrenciNotu, pk=pk)
-    oid = ogrenci_notu.ogrenci.id
-    ogrenci_notu.delete()
-    return redirect('ogrenci_detay', pk=oid)
+def ogrenci_not_duzenle(request, pk):
+    not_obj = get_object_or_404(OgrenciNot, pk=pk)
+    # Sadece notu veren öğretmen veya admin düzenleyebilir
+    if request.user.role != 'admin' and not_obj.ogretmen != request.user:
+        return redirect('dashboard')
+        
+    if request.method == 'POST':
+        puan = request.POST.get('puan')
+        aciklama = request.POST.get('aciklama')
+        
+        if puan:
+            not_obj.puan = puan
+            not_obj.aciklama = aciklama
+            not_obj.save()
+            messages.success(request, 'Not başarıyla güncellendi.')
+            return redirect('ogrenci_detay', pk=not_obj.ogrenci.id)
+            
+    return render(request, 'ogrenciler/ogrenci_not_duzenle.html', {'not_obj': not_obj})

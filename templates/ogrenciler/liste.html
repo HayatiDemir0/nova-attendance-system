@@ -15,40 +15,56 @@
     </div>
 </div>
 
-<div class="card">
+<div class="card shadow-sm border-0">
     <div class="table-responsive">
-        <table class="table table-hover">
-            <thead>
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
                 <tr>
-                    <th>#</th>
+                    <th class="ps-3">#</th>
                     <th>Ad Soyad</th>
                     <th>TC</th>
                     <th>Sınıf</th>
                     <th>Veli</th>
                     <th>Durum</th>
-                    <th>İşlemler</th>
+                    <th class="text-center">İşlemler</th>
                 </tr>
             </thead>
             <tbody>
                 {% for ogrenci in ogrenciler %}
                 <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td><strong>{{ ogrenci.tam_ad }}</strong></td>
-                    <td>{{ ogrenci.tc_kimlik }}</td>
-                    <td><span class="badge bg-info">{{ ogrenci.sinif.ad }}</span></td>
+                    <td class="ps-3">{{ forloop.counter }}</td>
+                    <td><strong>{{ ogrenci.get_full_name|default:ogrenci.username }}</strong></td>
+                    <td>{{ ogrenci.tc_kimlik|default:"-" }}</td>
+                    <td><span class="badge bg-info-subtle text-info border border-info-subtle px-3">{{ ogrenci.sinif.ad }}</span></td>
                     <td>{{ ogrenci.veli_adi|default:"-" }}</td>
                     <td>
                         {% if ogrenci.aktif %}
-                        <span class="badge bg-success">Aktif</span>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle">Aktif</span>
                         {% else %}
-                        <span class="badge bg-secondary">Pasif</span>
+                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Pasif</span>
                         {% endif %}
                     </td>
-                    <td>
-                        <a href="{% url 'ogrenci_detay' ogrenci.id %}" class="btn btn-sm btn-outline-info"><i class="ti ti-eye"></i></a>
-                        <a href="{% url 'ogrenci_duzenle' ogrenci.id %}" class="btn btn-sm btn-outline-primary"><i class="ti ti-edit"></i></a>
-                        <a href="{% url 'ogrenci_sil' ogrenci.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Silinsin mi?')"><i class="ti ti-trash"></i></a>
+                    <td class="text-center">
+                        <div class="btn-group shadow-sm">
+                            <a href="{% url 'ogrenci_not_ekle' ogrenci.id %}" class="btn btn-sm btn-white text-warning border" title="Not Ekle">
+                                <i class="ti ti-notebook fs-5"></i>
+                            </a>
+                            
+                            <a href="{% url 'ogrenci_detay' ogrenci.id %}" class="btn btn-sm btn-white text-info border" title="Görüntüle">
+                                <i class="ti ti-eye fs-5"></i>
+                            </a>
+                            <a href="{% url 'ogrenci_duzenle' ogrenci.id %}" class="btn btn-sm btn-white text-primary border" title="Düzenle">
+                                <i class="ti ti-edit fs-5"></i>
+                            </a>
+                            <a href="{% url 'ogrenci_sil' ogrenci.id %}" class="btn btn-sm btn-white text-danger border" onclick="return confirm('Silinsin mi?')" title="Sil">
+                                <i class="ti ti-trash fs-5"></i>
+                            </a>
+                        </div>
                     </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">Kayıtlı öğrenci bulunamadı.</td>
                 </tr>
                 {% endfor %}
             </tbody>

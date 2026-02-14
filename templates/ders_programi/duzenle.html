@@ -21,52 +21,62 @@
         <form method="post">
             {% csrf_token %}
             
-            {% if form.errors %}
-            <div class="alert alert-danger">
-                <ul class="mb-0">
-                    {% for field, errors in form.errors.items %}
-                        {% for error in errors %}<li>{{ error }}</li>{% endfor %}
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
-
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-bold">Öğretmen</label>
-                    {{ form.ogretmen }}
+                    <select name="ogretmen" class="form-select" required>
+                        {% for ogretmen in ogretmenler %}
+                        <option value="{{ ogretmen.id }}" {% if ders.ogretmen.id == ogretmen.id %}selected{% endif %}>
+                            {{ ogretmen.get_full_name|default:ogretmen.username }}
+                        </option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-bold">Sınıf</label>
-                    {{ form.sinif }}
+                    <select name="sinif" class="form-select" required>
+                        {% for sinif in siniflar %}
+                        <option value="{{ sinif.id }}" {% if ders.sinif.id == sinif.id %}selected{% endif %}>
+                            {{ sinif.ad }}
+                        </option>
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
             
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-bold">Ders Adı</label>
-                    {{ form.ders_adi }}
+                    <input type="text" name="ders_adi" class="form-control" value="{{ ders.ders_adi }}" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-bold">Gün</label>
-                    {{ form.gun }}
+                    <select name="gun" class="form-select" required>
+                        <option value="1" {% if ders.gun == 1 or ders.gun == '1' %}selected{% endif %}>Pazartesi</option>
+                        <option value="2" {% if ders.gun == 2 or ders.gun == '2' %}selected{% endif %}>Salı</option>
+                        <option value="3" {% if ders.gun == 3 or ders.gun == '3' %}selected{% endif %}>Çarşamba</option>
+                        <option value="4" {% if ders.gun == 4 or ders.gun == '4' %}selected{% endif %}>Perşembe</option>
+                        <option value="5" {% if ders.gun == 5 or ders.gun == '5' %}selected{% endif %}>Cuma</option>
+                        <option value="6" {% if ders.gun == 6 or ders.gun == '6' %}selected{% endif %}>Cumartesi</option>
+                        <option value="7" {% if ders.gun == 7 or ders.gun == '7' %}selected{% endif %}>Pazar</option>
+                    </select>
                 </div>
             </div>
             
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-bold">Başlangıç Saati</label>
-                    {{ form.baslangic_saati }}
+                    <input type="time" name="baslangic_saati" class="form-control" value="{{ ders.baslangic_saati|time:'H:i' }}" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label fw-bold">Bitiş Saati</label>
-                    {{ form.bitis_saati }}
+                    <input type="time" name="bitis_saati" class="form-control" value="{{ ders.bitis_saati|time:'H:i' }}" required>
                 </div>
             </div>
             
             <div class="form-check form-switch mb-4">
-                {{ form.aktif }}
-                <label class="form-check-label ms-2">Bu ders şu an aktif</label>
+                <input class="form-check-input" type="checkbox" name="aktif" id="aktifSwitch" {% if ders.aktif %}checked{% endif %}>
+                <label class="form-check-label ms-2" for="aktifSwitch">Bu ders şu an aktif</label>
             </div>
             
             <hr>

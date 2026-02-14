@@ -1,83 +1,54 @@
 {% extends 'base.html' %}
-{% block title %}Not Düzenle{% endblock %}
-{% block content %}
+{% block title %}Not Düzenle - {{ not_obj.ogrenci.get_full_name }}{% endblock %}
 
-<div class="page-header-section" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
-    <h1><i class="ti ti-edit me-3"></i>Not Düzenle - {{ ogrenci.tam_ad }}</h1>
-    <p class="mb-0">{{ ogrenci.sinif.ad }}</p>
+{% block content %}
+<div style="background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); color: white; padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+    <div class="row align-items-center">
+        <div class="col">
+            <h1><i class="ti ti-edit me-3"></i>Notu Güncelle</h1>
+            <p class="mb-0"><strong>Ders:</strong> {{ not_obj.ders.ders_adi }} | <strong>Tip:</strong> {{ not_obj.not_tipi }}</p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'ogrenci_detay' not_obj.ogrenci.id %}" class="btn btn-light">
+                <i class="ti ti-arrow-left me-2"></i>Vazgeç
+            </a>
+        </div>
+    </div>
 </div>
 
-<div class="card">
-    <div class="card-body">
+<div class="card shadow-sm border-0">
+    <div class="card-body p-4">
         <form method="post">
             {% csrf_token %}
             
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Kategori <span class="text-danger">*</span></label>
-                    <select name="kategori" class="form-select" required>
-                        <option value="genel" {% if ogrenci_notu.kategori == 'genel' %}selected{% endif %}>Genel Not</option>
-                        <option value="tatil" {% if ogrenci_notu.kategori == 'tatil' %}selected{% endif %}>Tatil/İzin</option>
-                        <option value="disiplin" {% if ogrenci_notu.kategori == 'disiplin' %}selected{% endif %}>Disiplin</option>
-                        <option value="saglik" {% if ogrenci_notu.kategori == 'saglik' %}selected{% endif %}>Sağlık</option>
-                        <option value="basari" {% if ogrenci_notu.kategori == 'basari' %}selected{% endif %}>Başarı/Ödül</option>
-                    </select>
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold text-danger">Yeni Puan</label>
+                    <input type="number" name="puan" class="form-control form-control-lg border-danger shadow-sm" 
+                           value="{{ not_obj.puan }}" min="0" max="100" required>
                 </div>
-                
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Tarih <span class="text-danger">*</span></label>
-                    <input type="date" name="tarih" class="form-control" value="{{ ogrenci_notu.tarih|date:'Y-m-d' }}" required>
+                <div class="col-md-8">
+                    <label class="form-label fw-bold">Açıklama Düzenle</label>
+                    <input type="text" name="aciklama" class="form-control form-control-lg" 
+                           value="{{ not_obj.aciklama|default:'' }}">
                 </div>
             </div>
-            
-            <div class="mb-3">
-                <label class="form-label">Başlık <span class="text-danger">*</span></label>
-                <input type="text" name="baslik" class="form-control" value="{{ ogrenci_notu.baslik }}" required minlength="3" maxlength="100">
+
+            <div class="alert alert-info border-0 shadow-sm d-flex align-items-center">
+                <i class="ti ti-info-circle fs-4 me-3"></i>
+                <div>
+                    Notu değiştirdiğinizde sistem güncellenme tarihini otomatik olarak kayıt altına alacaktır.
+                </div>
             </div>
-            
-            <div class="mb-3">
-                <label class="form-label">Açıklama <span class="text-danger">*</span></label>
-                <textarea name="aciklama" class="form-control" rows="5" required minlength="10" maxlength="1000">{{ ogrenci_notu.aciklama }}</textarea>
-            </div>
-            
-            <div class="alert alert-warning">
-                <i class="ti ti-alert-triangle me-2"></i>
-                <strong>Uyarı:</strong> Bu notu değiştirmek öğrenci geçmişini etkileyecektir.
-            </div>
-            
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary btn-lg">
-                    <i class="ti ti-check me-2"></i>Güncelle
+
+            <hr class="my-4">
+
+            <div class="d-flex justify-content-end gap-3">
+                <button type="submit" class="btn btn-success btn-lg px-5 shadow-sm">
+                    <i class="ti ti-device-floppy me-2"></i>Değişiklikleri Uygula
                 </button>
-                <a href="{% url 'ogrenci_detay' ogrenci.id %}" class="btn btn-outline-secondary btn-lg">
-                    <i class="ti ti-x me-2"></i>İptal
-                </a>
             </div>
         </form>
     </div>
 </div>
-
-<!-- Not Geçmişi -->
-<div class="card mt-4">
-    <div class="card-header">
-        <h4><i class="ti ti-history me-2"></i>Not Bilgileri</h4>
-    </div>
-    <div class="card-body">
-        <table class="table">
-            <tr>
-                <th>Oluşturan:</th>
-                <td>{{ ogrenci_notu.olusturan.get_full_name }}</td>
-            </tr>
-            <tr>
-                <th>Oluşturma Zamanı:</th>
-                <td>{{ ogrenci_notu.olusturma_zamani|date:"d.m.Y H:i" }}</td>
-            </tr>
-            <tr>
-                <th>Son Güncelleme:</th>
-                <td>{{ ogrenci_notu.guncelleme_zamani|date:"d.m.Y H:i" }}</td>
-            </tr>
-        </table>
-    </div>
-</div>
-
 {% endblock %}

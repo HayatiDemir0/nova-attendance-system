@@ -1,39 +1,50 @@
 {% extends 'base.html' %}
-
 {% block title %}Sınıf Ekle - Yoklama Sistemi{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Yeni Sınıf Ekle</h2>
-    <a href="{% url 'sinif_listesi' %}" class="btn btn-secondary">
-        <i class="bi bi-arrow-left"></i> Geri
-    </a>
+<div style="background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); color: white; padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+    <div class="row align-items-center">
+        <div class="col">
+            <h1><i class="ti ti-school me-3"></i>Yeni Sınıf Oluştur</h1>
+            <p class="mb-0">Sisteme yeni bir eğitim grubu veya sınıf tanımlayın</p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'yonetim_siniflar' %}" class="btn btn-light shadow-sm">
+                <i class="ti ti-arrow-left me-2"></i>Sınıf Listesine Dön
+            </a>
+        </div>
+    </div>
 </div>
 
-<div class="card">
-    <div class="card-body">
+<div class="card shadow-sm border-0">
+    <div class="card-body p-4">
         <form method="post">
             {% csrf_token %}
             
-            <div class="mb-3">
-                <label class="form-label">Sınıf Adı</label>
-                {{ form.ad }}
-                {% if form.ad.errors %}
-                    <div class="text-danger small">{{ form.ad.errors }}</div>
-                {% endif %}
+            <div class="row">
+                <div class="col-md-12 mb-4">
+                    <label class="form-label fw-bold text-dark fs-5">Sınıf Adı</label>
+                    <input type="text" name="ad" class="form-control form-control-lg border-2" 
+                           placeholder="Örn: Python 51 - JUNIOR CLASS" required style="border-color: #eee;">
+                    <div class="form-text mt-2 text-muted">Öğretmenlerin ve öğrencilerin göreceği sınıf adını giriniz.</div>
+                </div>
+
+                <div class="col-md-12 mb-4">
+                    <label class="form-label fw-bold text-dark fs-5">Açıklama / Not (Opsiyonel)</label>
+                    <textarea name="aciklama" class="form-control border-2" rows="4" 
+                              placeholder="Sınıf hakkında ek bilgiler..." style="border-color: #eee;"></textarea>
+                </div>
             </div>
-            
-            <div class="mb-3">
-                <label class="form-label">Açıklama</label>
-                {{ form.aciklama }}
-                {% if form.aciklama.errors %}
-                    <div class="text-danger small">{{ form.aciklama.errors }}</div>
-                {% endif %}
-            </div>
-            
-            <div class="text-end">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-circle"></i> Kaydet
+
+            <hr class="my-4">
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-muted">
+                    <i class="ti ti-info-circle me-1 text-warning"></i> 
+                    <small>Sınıfı oluşturduktan sonra ders programı atayabilirsiniz.</small>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm">
+                    <i class="ti ti-plus me-2"></i>Sınıfı Kaydet
                 </button>
             </div>
         </form>

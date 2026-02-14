@@ -1,34 +1,45 @@
 {% extends 'base.html' %}
-
 {% block title %}Sınıflar - Yoklama Sistemi{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Sınıflar</h2>
-    <a href="{% url 'sinif_ekle' %}" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> Yeni Sınıf Ekle
-    </a>
+<div style="background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); color: white; padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+    <div class="row align-items-center">
+        <div class="col">
+            <h1><i class="ti ti-school me-3"></i>Sınıf Yönetimi</h1>
+            <p class="mb-0">Sistemdeki tüm sınıfları görüntüleyin ve yönetin.</p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'sinif_ekle' %}" class="btn btn-light btn-lg shadow-sm">
+                <i class="ti ti-plus me-2"></i>Yeni Sınıf Ekle
+            </a>
+        </div>
+    </div>
 </div>
 
 <div class="row">
     {% if siniflar %}
         {% for sinif in siniflar %}
-        <div class="col-md-4 mb-3">
-            <div class="card">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0" style="transition: transform 0.2s;">
                 <div class="card-body">
-                    <h5 class="card-title">{{ sinif.ad }}</h5>
-                    <p class="card-text text-muted">{{ sinif.aciklama|default:"Açıklama yok" }}</p>
-                    <p class="mb-0">
-                        <i class="bi bi-people"></i> <strong>{{ sinif.ogrenci_sayisi }}</strong> öğrenci
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="card-title fw-bold text-dark mb-0">{{ sinif.ad }}</h5>
+                        <span class="badge bg-primary-subtle text-primary rounded-pill px-3">
+                            <i class="ti ti-users me-1"></i> {{ sinif.ogrenci_sayisi }} Öğrenci
+                        </span>
+                    </div>
+                    
+                    <p class="card-text text-muted small mb-4">
+                        {{ sinif.aciklama|default:"Bu sınıf için henüz bir açıklama girilmemiş." }}
                     </p>
-                    <hr>
-                    <div class="d-flex gap-2">
-                        <a href="{% url 'sinif_duzenle' sinif.pk %}" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-pencil"></i> Düzenle
+                    
+                    <div class="d-flex gap-2 mt-auto">
+                        <a href="{% url 'sinif_duzenle' sinif.pk %}" class="btn btn-sm btn-outline-primary flex-grow-1">
+                            <i class="ti ti-edit me-1"></i> Düzenle
                         </a>
                         <a href="{% url 'sinif_sil' sinif.pk %}" class="btn btn-sm btn-outline-danger" 
-                           onclick="return confirm('Bu sınıfı silmek istediğinize emin misiniz?')">
-                            <i class="bi bi-trash"></i> Sil
+                           onclick="return confirm('Bu sınıfı silmek istediğinize emin misiniz? Sınıfa bağlı tüm veriler silinebilir!')">
+                            <i class="ti ti-trash"></i>
                         </a>
                     </div>
                 </div>
@@ -37,8 +48,27 @@
         {% endfor %}
     {% else %}
     <div class="col-12">
-        <p class="text-muted text-center py-4">Henüz sınıf eklenmemiş.</p>
+        <div class="text-center py-5 bg-light rounded-3 border-dashed">
+            <i class="ti ti-alert-circle text-muted mb-3" style="font-size: 3rem;"></i>
+            <p class="text-muted fs-5">Henüz kayıtlı bir sınıf bulunamadı.</p>
+            <a href="{% url 'sinif_ekle' %}" class="btn btn-primary">İlk Sınıfı Ekle</a>
+        </div>
     </div>
     {% endif %}
 </div>
+
+<div class="mt-4 pb-5">
+    <a href="{% url 'yonetim_panel' %}" class="btn btn-link text-secondary ps-0">
+        <i class="ti ti-arrow-left me-2"></i>Yönetim Paneline Dön
+    </a>
+</div>
+
+<style>
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .border-dashed {
+        border: 2px dashed #dee2e6 !important;
+    }
+</style>
 {% endblock %}
