@@ -251,20 +251,31 @@ def yoklama_al(request, ders_id):
     sinif = ders.sinif
     ogrenciler = Ogrenci.objects.filter(sinif=sinif, aktif=True)
     
+    # Hatanın çözümü için boş bir sözlük ekliyoruz
+    context = {
+        'ders': ders,
+        'ogrenciler': ogrenciler,
+        'sinif': sinif,
+        'yoklama_detaylari': {}, # Template'deki filtrenin hata vermemesi için şart
+        'bugun': timezone.now().date()
+    }
+    
     if request.method == 'POST':
         yoklama = Yoklama.objects.create(
-            ders_programi=ders, tarih=timezone.now().date(),
+            ders_programi=ders, 
+            tarih=timezone.now().date(),
             ders_basligi=request.POST.get('ders_basligi', ders.ders_adi),
-            ogretmen=request.user, sinif=sinif
+            ogretmen=request.user, 
+            sinif=sinif
         )
         for ogrenci in ogrenciler:
             durum = request.POST.get(f'durum_{ogrenci.id}', 'var')
             YoklamaDetay.objects.create(yoklama=yoklama, ogrenci=ogrenci, durum=durum)
         
-        messages.success(request, 'Yoklama kaydedildi!')
+        messages.success(request, 'Yoklama başarıyla kaydedildi!')
         return redirect('dashboard')
 
-    return render(request, 'yoklama/al.html', {'ders': ders, 'ogrenciler': ogrenciler, 'sinif': sinif})
+    return render(request, 'yoklama/al.html', context)
 
 @login_required
 def yoklama_detay(request, pk):
