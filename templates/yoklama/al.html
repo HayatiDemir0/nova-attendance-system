@@ -86,38 +86,35 @@
         const uyariMetni = document.getElementById('uyariMetni');
 
         function kontrolEt() {
-            // Metni al ve kelimelere böl (boşlukları temizle)
             const metin = baslikInput.value.trim();
             const kelimeListesi = metin.split(/\s+/).filter(k => k.length > 0);
             const sayi = kelimeListesi.length;
             
             kelimeGosterge.innerText = sayi;
 
-            if (sayi >= 3) {
-                // Şart sağlandı
+            // SADECE VE SADECE 3 KELİME ŞARTI
+            if (sayi === 3) {
                 kaydetButon.disabled = false;
                 baslikInput.classList.remove('is-invalid');
                 baslikInput.classList.add('is-valid');
-                uyariMetni.innerHTML = '<i class="ti ti-check text-success"></i> Konu yeterli uzunlukta.';
+                uyariMetni.innerHTML = '<i class="ti ti-check text-success"></i> Tam 3 kelime. Kaydedebilirsiniz.';
                 uyariMetni.classList.replace('text-danger', 'text-success');
             } else {
-                // Şart sağlanmadı
                 kaydetButon.disabled = true;
                 baslikInput.classList.remove('is-valid');
                 baslikInput.classList.add('is-invalid');
-                uyariMetni.innerHTML = '<i class="ti ti-alert-circle"></i> En az 3 kelime yazılması zorunludur.';
+                
+                if (sayi < 3) {
+                    uyariMetni.innerHTML = '<i class="ti ti-alert-circle"></i> Eksik kelime! Tam 3 kelime yazmalısınız.';
+                } else {
+                    uyariMetni.innerHTML = '<i class="ti ti-alert-circle"></i> Çok fazla kelime! Sadece 3 kelime yazmalısınız.';
+                }
                 uyariMetni.classList.replace('text-success', 'text-danger');
             }
         }
 
-        // Hem yazarken hem de sayfa yüklendiğinde (hata sonrası dönüşte) kontrol et
         baslikInput.addEventListener('input', kontrolEt);
         kontrolEt(); 
     });
 </script>
-
-<style>
-    .is-invalid { border-color: #dc3545 !important; box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important; }
-    .is-valid { border-color: #198754 !important; box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25) !important; }
-</style>
 {% endblock %}
