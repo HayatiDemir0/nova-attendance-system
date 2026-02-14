@@ -246,58 +246,95 @@ def ogrenci_detay(request, pk):
 
 @login_required
 def yoklama_al(request, ders_id):
-    """Öğretmenin sınıf listesini gördüğü ve yoklama aldığı yer"""
     ders = get_object_or_404(DersProgrami, id=ders_id)
-    sinif = ders.sinif
-    ogrenciler = Ogrenci.objects.filter(sinif=sinif, aktif=True)
-    
-    # Hatanın çözümü için boş bir sözlük ekliyoruz
-    context = {
-        'ders': ders,
-        'ogrenciler': ogrenciler,
-        'sinif': sinif,
-        'yoklama_detaylari': {}, # Template'deki filtrenin hata vermemesi için şart
-        'bugun': timezone.now().date()
-    }
+    ogrenciler = Ogrenci.objects.filter(sinif=ders.sinif, aktif=True)
     
     if request.method == 'POST':
+        ders_basligi = request.POST.get('ders_basligi', '').strip()
+        
+        # 1. Kontrol: Ders başlığı boş olamaz
+        if not ders_basligi:
+            messages.error(request, "Lütfen bugün hangi konuyu işlediğinizi belirtin!")
+            return redirect('yoklama_al', ders_id=ders_id)
+
+        # 2. Kontrol: Ders açıklaması kelime sınırı (Örn: En az 3 kelime)
+        if len(ders_basligi.split()) < 3:
+            messages.error(request, "Ders başlığı çok kısa! En az 3 kelime ile açıklayın.")
+            return redirect('yoklama_al', ders_id=ders_id)
+
         yoklama = Yoklama.objects.create(
-            ders_programi=ders, 
+            ders_programi=ders,
             tarih=timezone.now().date(),
-            ders_basligi=request.POST.get('ders_basligi', ders.ders_adi),
-            ogretmen=request.user, 
-            sinif=sinif
+            ders_basligi=ders_basligi,
+            ogretmen=request.user,
+            sinif=ders.sinif
         )
+
         for ogrenci in ogrenciler:
             durum = request.POST.get(f'durum_{ogrenci.id}', 'var')
-            YoklamaDetay.objects.create(yoklama=yoklama, ogrenci=ogrenci, durum=durum)
+            ogrenci_notu = request.POST.get(f'not_{ogrenci.id}', '') # Notu al
+            
+            YoklamaDetay.objects.create(
+                yoklama=yoklama, 
+                ogrenci=ogrenci, 
+                durum=durum,
+                notlar=ogrenci_notu # Modelinde 'notlar' alanı olduğunu varsayıyorum
+            )
         
-        messages.success(request, 'Yoklama başarıyla kaydedildi!')
+        messages.success(request, 'Yoklama ve öğrenci notları başarıyla kaydedildi!')
         return redirect('dashboard')
 
-    return render(request, 'yoklama/al.html', context)
+    return render(request, 'yoklama/al.html', {'ders': ders, 'ogrenciler': ogrenciler})
 
 @login_required
 def yoklama_detay(request, pk):
     yoklama = get_object_or_404(Yoklama, pk=pk)
-    return render(request, 'yoklama/detay.html', {'yoklama': yoklama})
+    detaylar = yoklama.detaylar.all().select_related('ogrenci')
+    
+    # İstatistikleri hesaplayalım ki template hata vermesin
+    istatistik = {
+        'toplam': detaylar.count(),
+        'var': detaylar.filter(durum='var').count(),
+        'yok': detaylar.filter(durum='yok').count(),
+        'izinli': detaylar.filter(durum='izinli').count(),
+        'gec': detaylar.filter(durum='gec').count(),
+    }
+    
+    context = {
+        'yoklama': yoklama,
+        'detaylar': detaylar,
+        'istatistik': istatistik, # Eksik olan ve hataya sebep olan değişken bu
+    }
+    
+    return render(request, 'yoklama/detay.html', context)
 
 # ==================== ÖĞRENCİ NOTLARI (CRUD) ====================
 
 @login_required
 def ogrenci_not_ekle(request, ogrenci_id):
-    ogrenci = get_object_or_404(Ogrenci, id=ogrenci_id)
     if request.method == 'POST':
+        ogrenci = get_object_or_404(Ogrenci, id=ogrenci_id)
+        aciklama = request.POST.get('aciklama', '').strip()
+        baslik = request.POST.get('baslik', '').strip()
+        kategori = request.POST.get('kategori', 'genel')
+        
+        # Kelime Sayısı Kontrolü (Örn: En az 5 kelime)
+        kelime_listesi = aciklama.split()
+        if len(kelime_listesi) < 5:
+            messages.error(request, "Not çok kısa! Lütfen durumu en az 5 kelime ile detaylıca açıklayın.")
+            return redirect('ogrenci_detay', pk=ogrenci_id)
+
         OgrenciNotu.objects.create(
-            ogrenci=ogrenci, olusturan=request.user,
-            kategori=request.POST.get('kategori', 'genel'),
-            baslik=request.POST.get('baslik'),
-            aciklama=request.POST.get('aciklama'),
-            tarih=request.POST.get('tarih') or timezone.now().date()
+            ogrenci=ogrenci,
+            olusturan=request.user,
+            kategori=kategori,
+            baslik=baslik,
+            aciklama=aciklama,
+            tarih=timezone.now().date()
         )
-        messages.success(request, 'Not eklendi!')
-        return redirect('ogrenci_detay', pk=ogrenci_id)
-    return render(request, 'ogrenciler/ogrenci_not_ekle.html', {'ogrenci': ogrenci})
+        messages.success(request, "Öğrenci notu başarıyla sisteme işlendi.")
+        
+    return redirect('ogrenci_detay', pk=ogrenci_id)
 
 @login_required
 def ogrenci_not_duzenle(request, pk):

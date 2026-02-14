@@ -1,43 +1,148 @@
-<div class="row">
-    <div class="col-md-5">
-        <div class="activity-card">
-            <h4 class="mb-4"><i class="ti ti-message-2 me-2 text-primary"></i>Öğrenciye Yorum Bırak</h4>
-            <form action="{% url 'ogrenci_not_ekle' ogrenci.id %}" method="POST">
-                {% csrf_token %}
-                <input type="hidden" name="kategori" value="genel">
-                <div class="mb-3">
-                    <label class="form-label">Başlık</label>
-                    <input type="text" name="baslik" class="form-control" placeholder="Örn: Aylık Gelişim Raporu" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Yorumunuz</label>
-                    <textarea name="aciklama" class="form-control" rows="4" placeholder="Öğrenci hakkında detaylı görüşünüzü yazın..." required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Yorumu Gönder</button>
-            </form>
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-xl py-4">
+    <div class="row align-items-center mb-4">
+        <div class="col">
+            <h2 class="page-title">{{ ogrenci.tam_ad }}</h2>
+            <div class="text-muted mt-1">
+                <span class="badge bg-primary-lt">{{ ogrenci.sinif.ad }}</span>
+                <span class="ms-2">Kayıt Tarihi: {{ ogrenci.kayit_tarihi|date:"d.m.Y" }}</span>
+            </div>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'ogrenci_duzenle' ogrenci.id %}" class="btn btn-outline-secondary">
+                <i class="ti ti-edit me-2"></i>Düzenle
+            </a>
         </div>
     </div>
 
-    <div class="col-md-7">
-        <div class="activity-card">
-            <h4 class="mb-4"><i class="ti ti-history me-2 text-info"></i>Geçmiş Yorumlar</h4>
-            <div style="max-height: 450px; overflow-y: auto; padding-right: 10px;">
-                {% for not in notlar %}
-                <div class="activity-item">
-                    <div class="d-flex justify-content-between">
-                        <span class="badge bg-light text-dark mb-2">{{ not.tarih|date:"d.m.Y" }}</span>
-                        <small class="text-muted">Ekleyen: {{ not.olusturan.get_full_name }}</small>
+    <div class="row row-cards">
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-light">
+                    <h3 class="card-title font-weight-bold">Kişisel Bilgiler</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled space-y-2">
+                        <li><strong>TC:</strong> {{ ogrenci.tc_kimlik }}</li>
+                        <li><strong>Cinsiyet:</strong> {{ ogrenci.get_cinsiyet_display }}</li>
+                        <li><strong>Doğum Tarihi:</strong> {{ ogrenci.dogum_tarihi|date:"d.m.Y" }}</li>
+                        <hr>
+                        <li><strong>Veli:</strong> {{ ogrenci.veli_adi }}</li>
+                        <li><strong>Veli Tel:</strong> <a href="tel:{{ ogrenci.veli_telefon }}">{{ ogrenci.veli_telefon }}</a></li>
+                        <li><strong>Adres:</strong> {{ ogrenci.adres }}</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="subheader">Devamsızlık Özeti</div>
+                    <div class="h1 mb-3 text-danger">{{ yoklama_istatistik.yok|default:"0" }} Gün</div>
+                    <div class="progress progress-sm">
+                        <div class="progress-bar bg-danger" style="width: 25%" role="progressbar"></div>
                     </div>
-                    <h6 class="fw-bold">{{ not.baslik }}</h6>
-                    <p class="text-secondary small mb-0">{{ not.aciklama }}</p>
                 </div>
-                {% empty %}
-                <div class="text-center py-4">
-                    <i class="ti ti-mood-empty fs-1 text-muted"></i>
-                    <p class="text-muted">Henüz yorum yapılmamış.</p>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card mb-4 border-start border-primary border-4 shadow">
+                <div class="card-body">
+                    <h3 class="card-title"><i class="ti ti-pencil me-2"></i>Önemli Kayıt Ekle (Ödeme, Tatil, Disiplin)</h3>
+                    <form action="{% url 'ogrenci_not_ekle' ogrenci.id %}" method="POST" id="notForm">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-7">
+                                <label class="form-label">Konu Başlığı</label>
+                                <input type="text" name="baslik" class="form-control" placeholder="Örn: Mart Ayı Taksit Gecikmesi" required>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label">Kategori</label>
+                                <select name="kategori" class="form-select">
+                                    <option value="genel">Genel Not</option>
+                                    <option value="odeme">Ödeme Gecikmesi</option>
+                                    <option value="tatil">Tatil/İzin</option>
+                                    <option value="disiplin">Disiplin</option>
+                                    <option value="basari">Başarı/Ödül</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Detaylı Açıklama</label>
+                                <textarea name="aciklama" id="notAciklama" class="form-control" rows="3" 
+                                          placeholder="Durumu detaylıca anlatın..."></textarea>
+                                <div id="kelimeUyari" class="form-text text-danger mt-2 fw-bold">
+                                    <i class="ti ti-alert-circle"></i> En az 5 kelime yazmalısınız. 
+                                    (Şu an: <span id="wordCount">0</span>)
+                                </div>
+                            </div>
+                            <div class="col-12 text-end">
+                                <button type="submit" id="kaydetBtn" class="btn btn-primary px-4 shadow-sm" disabled>
+                                    <i class="ti ti-device-floppy me-2"></i>Sisteme İşle
+                                </button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-                {% endfor %}
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h3 class="card-title">Öğrenci Kayıt Geçmişi</h3>
+                </div>
+                <div class="list-group list-group-flush list-group-hoverable">
+                    {% for not in ogrenci.notlar.all %}
+                    <div class="list-group-item">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <span class="avatar bg-{{ not.get_kategori_color }}-lt">
+                                    <i class="ti {{ not.get_kategori_icon }}"></i>
+                                </span>
+                            </div>
+                            <div class="col">
+                                <div class="font-weight-bold">{{ not.baslik }}</div>
+                                <div class="text-muted">{{ not.aciklama }}</div>
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        <i class="ti ti-calendar me-1"></i>{{ not.tarih|date:"d.m.Y" }} 
+                                        <i class="ti ti-user ms-3 me-1"></i>Ekleyen: {{ not.olusturan.get_full_name }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5">
+                        <div class="text-muted">Bu öğrenci için henüz bir özel kayıt girilmemiş.</div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    const textArea = document.getElementById('notAciklama');
+    const saveBtn = document.getElementById('kaydetBtn');
+    const wordDisplay = document.getElementById('wordCount');
+
+    textArea.addEventListener('input', function() {
+        const text = this.value.trim();
+        const wordCount = text ? text.split(/\s+/).length : 0;
+        
+        wordDisplay.innerText = wordCount;
+
+        if (wordCount >= 5) {
+            saveBtn.disabled = false;
+            wordDisplay.classList.remove('text-danger');
+            wordDisplay.classList.add('text-success');
+        } else {
+            saveBtn.disabled = true;
+            wordDisplay.classList.remove('text-success');
+            wordDisplay.classList.add('text-danger');
+        }
+    });
+</script>
+{% endblock %}

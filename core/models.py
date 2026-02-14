@@ -143,6 +143,7 @@ class YoklamaDetay(models.Model):
 class OgrenciNotu(models.Model):
     KATEGORI_CHOICES = [
         ('tatil', 'Tatil/İzin'),
+        ('odeme', 'Ödeme Gecikmesi/Durumu'),
         ('disiplin', 'Disiplin'),
         ('saglik', 'Sağlık'),
         ('basari', 'Başarı/Ödül'),
@@ -180,6 +181,7 @@ class OgrenciNotu(models.Model):
     def get_kategori_color(self):
         colors = {
             'tatil': 'info',
+            'odeme': 'danger',
             'disiplin': 'danger',
             'saglik': 'warning',
             'basari': 'success',
