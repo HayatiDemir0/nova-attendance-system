@@ -185,10 +185,35 @@ def yonetim_ders_programi(request):
 
 @login_required
 def yonetim_yoklamalar(request):
+    """Admin için filtrelemeli ve sayfalamalı yoklama listesi"""
     if request.user.role != 'admin':
         return redirect('dashboard')
-    yoklamalar = Yoklama.objects.select_related('ogretmen', 'sinif', 'ders_programi').order_by('-tarih')
-    return render(request, 'yonetim/yoklamalar.html', {'yoklamalar': yoklamalar})
+    
+    yoklamalar_sorgu = Yoklama.objects.select_related('ogretmen', 'sinif', 'ders_programi').order_by('-tarih', '-id')
+    
+    # Filtreleme verilerini al
+    secili_ogretmen = request.GET.get('ogretmen')
+    secili_sinif = request.GET.get('sinif')
+    secili_tarih = request.GET.get('tarih')
+
+    if secili_ogretmen: yoklamalar_sorgu = yoklamalar_sorgu.filter(ogretmen_id=secili_ogretmen)
+    if secili_sinif: yoklamalar_sorgu = yoklamalar_sorgu.filter(sinif_id=secili_sinif)
+    if secili_tarih: yoklamalar_sorgu = yoklamalar_sorgu.filter(tarih=secili_tarih)
+
+    # Sayfalama (Paginator) - Template'deki hatayı çözen kısım burası
+    from django.core.paginator import Paginator
+    paginator = Paginator(yoklamalar_sorgu, 10) # Her sayfada 10 kayıt
+    page_number = request.GET.get('page')
+    yoklamalar_sayfalanmis = paginator.get_page(page_number)
+
+    return render(request, 'yonetim/yoklamalar.html', {
+        'yoklamalar': yoklamalar_sayfalanmis,
+        'ogretmenler': User.objects.filter(role='ogretmen'),
+        'siniflar': Sinif.objects.all(),
+        'secili_ogretmen': secili_ogretmen,
+        'secili_sinif': secili_sinif,
+        'secili_tarih': secili_tarih,
+    })
 
 @login_required
 def yonetim_ayarlar(request):
@@ -251,23 +276,17 @@ def yoklama_al(request, ders_id):
     
     if request.method == 'POST':
         ders_basligi = request.POST.get('ders_basligi', '').strip()
-
-        # KELİME KONTROLÜ BURADA:
         kelime_listesi = ders_basligi.split()
-        if len(kelime_listesi) < 3:
-            from django.contrib import messages
-            messages.error(request, "Ders konusu çok kısa! En az 3 kelime yazmalısınız.")
-            return redirect(request.path) # Sayfayı hata mesajıyla yenile
         
-        # 1. Kontrol: Ders başlığı boş olamaz
-        if not ders_basligi:
-            messages.error(request, "Lütfen bugün hangi konuyu işlediğinizi belirtin!")
-            return redirect('yoklama_al', ders_id=ders_id)
-
-        # 2. Kontrol: Ders açıklaması kelime sınırı (Örn: En az 3 kelime)
-        if len(ders_basligi.split()) < 3:
-            messages.error(request, "Ders başlığı çok kısa! En az 3 kelime ile açıklayın.")
-            return redirect('yoklama_al', ders_id=ders_id)
+        # --- TAM 3 KELİME KONTROLÜ ---
+        if len(kelime_listesi) != 3:
+            messages.error(request, f"Hata: Ders konusu tam olarak 3 kelime olmalıdır! (Şu an: {len(kelime_listesi)})")
+            # Yazdığı metin silinmesin diye context ile geri gönderiyoruz
+            return render(request, 'yoklama/al.html', {
+                'ders': ders, 
+                'ogrenciler': ogrenciler, 
+                'hata_baslik': ders_basligi
+            })
 
         yoklama = Yoklama.objects.create(
             ders_programi=ders,
@@ -279,7 +298,7 @@ def yoklama_al(request, ders_id):
 
         for ogrenci in ogrenciler:
             durum = request.POST.get(f'durum_{ogrenci.id}', 'var')
-            ogrenci_notu = request.POST.get(f'not_{ogrenci.id}', '') # Notu al
+            ogrenci_notu = request.POST.get(f'not_{ogrenci.id}', '')
             
             YoklamaDetay.objects.create(
                 yoklama=yoklama, 
@@ -288,7 +307,7 @@ def yoklama_al(request, ders_id):
                 not_durumu=ogrenci_notu
             )
         
-        messages.success(request, 'Yoklama ve öğrenci notları başarıyla kaydedildi!')
+        messages.success(request, 'Yoklama başarıyla kaydedildi!')
         return redirect('dashboard')
 
     return render(request, 'yoklama/al.html', {'ders': ders, 'ogrenciler': ogrenciler})
