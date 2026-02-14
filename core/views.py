@@ -251,6 +251,13 @@ def yoklama_al(request, ders_id):
     
     if request.method == 'POST':
         ders_basligi = request.POST.get('ders_basligi', '').strip()
+
+        # KELİME KONTROLÜ BURADA:
+        kelime_listesi = ders_basligi.split()
+        if len(kelime_listesi) < 3:
+            from django.contrib import messages
+            messages.error(request, "Ders konusu çok kısa! En az 3 kelime yazmalısınız.")
+            return redirect(request.path) # Sayfayı hata mesajıyla yenile
         
         # 1. Kontrol: Ders başlığı boş olamaz
         if not ders_basligi:
@@ -264,10 +271,10 @@ def yoklama_al(request, ders_id):
 
         yoklama = Yoklama.objects.create(
             ders_programi=ders,
-            tarih=timezone.now().date(),
             ders_basligi=ders_basligi,
             ogretmen=request.user,
-            sinif=ders.sinif
+            sinif=ders.sinif,
+            tarih=timezone.now().date()
         )
 
         for ogrenci in ogrenciler:

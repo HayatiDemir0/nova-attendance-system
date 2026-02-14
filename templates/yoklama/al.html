@@ -1,83 +1,123 @@
 {% extends 'base.html' %}
+
 {% block content %}
 <div class="container mt-4">
-    <form method="POST" id="yoklamaForm">
-        {% csrf_token %}
-        
-        <div class="card mb-4 shadow-sm border-primary">
-            <div class="card-body">
-                <label class="form-label fw-bold">İşlenen Ders Konusu / Başlığı *</label>
-                <input type="text" name="ders_basligi" id="dersBasligi" 
-                       class="form-control form-control-lg" 
-                       placeholder="Örn: Python Fonksiyonlar ve Listeler" required>
-                <div id="baslikYardim" class="form-text text-danger mt-2">
-                    Lütfen en az 3 kelime yazın. (Şu an: <span id="kelimeSayisi">0</span> kelime)
-                </div>
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3><i class="ti ti-checklist text-primary"></i> {{ ders.ders_adi }} - Yoklama Al</h3>
+                <span class="badge bg-info p-2">{{ ders.sinif.ad }}</span>
             </div>
-        </div>
 
-        <div class="card shadow">
-            <div class="table-responsive">
-                <table class="table align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Öğrenci</th>
-                            <th>Durum</th>
-                            <th>Öğrenciye Not/Geri Bildirim</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for ogrenci in ogrenciler %}
-                        <tr>
-                            <td><strong>{{ ogrenci.tam_ad }}</strong></td>
-                            <td>
-                                <select name="durum_{{ ogrenci.id }}" class="form-select form-select-sm">
-                                    <option value="var">Var</option>
-                                    <option value="yok">Yok</option>
-                                    <option value="izinli">İzinli</option>
-                                </select>
-                            </td>
-                            <td>
-                                <input type="text" name="not_{{ ogrenci.id }}" 
-                                       class="form-control form-control-sm" 
-                                       placeholder="Örn: Derse çok ilgiliydi">
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <div class="card-footer text-end">
-                <button type="submit" id="kaydetButon" class="btn btn-primary btn-lg px-5 shadow" disabled>
-                    Yoklamayı Kaydet
-                </button>
-            </div>
+            <form method="POST" id="yoklamaForm">
+                {% csrf_token %}
+                
+                <div class="card mb-4 shadow-sm border-primary">
+                    <div class="card-body">
+                        <label class="form-label fw-bold">İşlenen Ders Konusu / Başlığı *</label>
+                        <input type="text" name="ders_basligi" id="dersBasligi" 
+                               class="form-control form-control-lg" 
+                               placeholder="Örn: Python Fonksiyonlar ve Listeler" 
+                               value="{{ hata_baslik|default:'' }}" required>
+                        <div id="baslikYardim" class="form-text mt-2 d-flex justify-content-between">
+                            <span id="uyariMetni" class="text-danger">
+                                <i class="ti ti-info-circle"></i> En az 3 kelime yazılması zorunludur.
+                            </span>
+                            <span class="badge bg-secondary">
+                                <span id="kelimeSayisi">0</span> Kelime
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 30%;">Öğrenci</th>
+                                    <th style="width: 20%;">Durum</th>
+                                    <th style="width: 50%;">Öğrenciye Not/Geri Bildirim</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ogrenci in ogrenciler %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="fw-bold">{{ ogrenci.tam_ad }}</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <select name="durum_{{ ogrenci.id }}" class="form-select form-select-sm border-2">
+                                            <option value="var" class="text-success">Var</option>
+                                            <option value="yok" class="text-danger">Yok</option>
+                                            <option value="izinli" class="text-warning">İzinli</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="text" name="not_{{ ogrenci.id }}" 
+                                               class="form-control form-control-sm" 
+                                               placeholder="Derse katılımı, ödev durumu vb.">
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="card-footer bg-white border-top-0 d-flex justify-content-between align-items-center p-3">
+                        <small class="text-muted">* Tüm öğrencilerin durumunu kontrol etmeyi unutmayın.</small>
+                        <button type="submit" id="kaydetButon" class="btn btn-primary btn-lg px-5 shadow" disabled>
+                            <i class="ti ti-device-floppy"></i> Yoklamayı Kaydet
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 </div>
 
 <script>
-    const baslikInput = document.getElementById('dersBasligi');
-    const kaydetButon = document.getElementById('kaydetButon');
-    const kelimeGosterge = document.getElementById('kelimeSayisi');
+    document.addEventListener('DOMContentLoaded', function() {
+        const baslikInput = document.getElementById('dersBasligi');
+        const kaydetButon = document.getElementById('kaydetButon');
+        const kelimeGosterge = document.getElementById('kelimeSayisi');
+        const uyariMetni = document.getElementById('uyariMetni');
 
-    baslikInput.addEventListener('input', function() {
-        const metin = this.value.trim();
-        const kelimeListesi = metin.split(/\s+/).filter(k => k.length > 0);
-        const sayi = kelimeListesi.length;
-        
-        kelimeGosterge.innerText = sayi;
+        function kontrolEt() {
+            // Metni al ve kelimelere böl (boşlukları temizle)
+            const metin = baslikInput.value.trim();
+            const kelimeListesi = metin.split(/\s+/).filter(k => k.length > 0);
+            const sayi = kelimeListesi.length;
+            
+            kelimeGosterge.innerText = sayi;
 
-        // Engel: Eğer kelime sayısı 3'ten azsa buton pasif kalır
-        if (sayi >= 3) {
-            kaydetButon.disabled = false;
-            baslikInput.classList.remove('is-invalid');
-            baslikInput.classList.add('is-valid');
-        } else {
-            kaydetButon.disabled = true;
-            baslikInput.classList.remove('is-valid');
-            baslikInput.classList.add('is-invalid');
+            if (sayi >= 3) {
+                // Şart sağlandı
+                kaydetButon.disabled = false;
+                baslikInput.classList.remove('is-invalid');
+                baslikInput.classList.add('is-valid');
+                uyariMetni.innerHTML = '<i class="ti ti-check text-success"></i> Konu yeterli uzunlukta.';
+                uyariMetni.classList.replace('text-danger', 'text-success');
+            } else {
+                // Şart sağlanmadı
+                kaydetButon.disabled = true;
+                baslikInput.classList.remove('is-valid');
+                baslikInput.classList.add('is-invalid');
+                uyariMetni.innerHTML = '<i class="ti ti-alert-circle"></i> En az 3 kelime yazılması zorunludur.';
+                uyariMetni.classList.replace('text-success', 'text-danger');
+            }
         }
+
+        // Hem yazarken hem de sayfa yüklendiğinde (hata sonrası dönüşte) kontrol et
+        baslikInput.addEventListener('input', kontrolEt);
+        kontrolEt(); 
     });
 </script>
+
+<style>
+    .is-invalid { border-color: #dc3545 !important; box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important; }
+    .is-valid { border-color: #198754 !important; box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25) !important; }
+</style>
 {% endblock %}
