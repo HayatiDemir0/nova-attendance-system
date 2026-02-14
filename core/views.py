@@ -7,7 +7,7 @@ from django.contrib.auth import authenticate, login, logout
 from .models import User, Sinif, Ogrenci, DersProgrami, Yoklama, OgrenciNotu, YoklamaDetay
 import calendar
 from datetime import datetime
-from .models import Sinif, DersProgrami, OgrenciNot  # OgrenciNot burada ekli olmalı
+from .models import Sinif, DersProgrami, OgrenciNotu, User, Ogrenci
 
 # ==================== GENEL VE KİMLİK DOĞRULAMA ====================
 
@@ -620,49 +620,42 @@ def ogrenci_not_ekle(request, ogrenci_id):
     if request.user.role not in ['admin', 'ogretmen']:
         return redirect('dashboard')
         
-    ogrenci = get_object_or_404(User, id=ogrenci_id, role='ogrenci')
-    dersler = DersProgrami.objects.filter(aktif=True) # veya okulun ders listesi
+    ogrenci = get_object_or_404(Ogrenci, id=ogrenci_id)
     
     if request.method == 'POST':
-        puan = request.POST.get('puan')
-        ders_id = request.POST.get('ders')
-        not_tipi = request.POST.get('not_tipi')
+        baslik = request.POST.get('baslik')
+        kategori = request.POST.get('kategori', 'genel')
         aciklama = request.POST.get('aciklama')
+        tarih = request.POST.get('tarih') or timezone.now().date()
         
-        if puan and ders_id:
-            # Not modelinizin ismine göre burayı güncelleyin (Not veya OgrenciNot)
-            OgrenciNot.objects.create(
+        if baslik and aciklama:
+            OgrenciNotu.objects.create(
                 ogrenci=ogrenci,
-                ders_id=ders_id,
-                puan=puan,
-                not_tipi=not_tipi,
+                olusturan=request.user,
+                kategori=kategori,
+                baslik=baslik,
                 aciklama=aciklama,
-                ogretmen=request.user
+                tarih=tarih
             )
-            messages.success(request, f'{ogrenci.get_full_name()} için not eklendi.')
+            messages.success(request, 'Not başarıyla eklendi!')
             return redirect('ogrenci_detay', pk=ogrenci_id)
             
-    return render(request, 'ogrenciler/ogrenci_not_ekle.html', {
-        'ogrenci': ogrenci,
-        'dersler': dersler
-    })
+    return render(request, 'ogrenciler/ogrenci_not_ekle.html', {'ogrenci': ogrenci})
 
 @login_required
 def ogrenci_not_duzenle(request, pk):
-    not_obj = get_object_or_404(OgrenciNot, pk=pk)
-    # Sadece notu veren öğretmen veya admin düzenleyebilir
-    if request.user.role != 'admin' and not_obj.ogretmen != request.user:
+    not_obj = get_object_or_404(OgrenciNotu, pk=pk)
+    
+    if request.user.role != 'admin' and not_obj.olusturan != request.user:
         return redirect('dashboard')
         
     if request.method == 'POST':
-        puan = request.POST.get('puan')
-        aciklama = request.POST.get('aciklama')
-        
-        if puan:
-            not_obj.puan = puan
-            not_obj.aciklama = aciklama
-            not_obj.save()
-            messages.success(request, 'Not başarıyla güncellendi.')
-            return redirect('ogrenci_detay', pk=not_obj.ogrenci.id)
+        not_obj.baslik = request.POST.get('baslik')
+        not_obj.kategori = request.POST.get('kategori')
+        not_obj.aciklama = request.POST.get('aciklama')
+        not_obj.tarih = request.POST.get('tarih')
+        not_obj.save()
+        messages.success(request, 'Not güncellendi!')
+        return redirect('ogrenci_detay', pk=not_obj.ogrenci.id)
             
     return render(request, 'ogrenciler/ogrenci_not_duzenle.html', {'not_obj': not_obj})
