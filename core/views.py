@@ -278,7 +278,7 @@ def yoklama_al(request, ders_id):
                 yoklama=yoklama, 
                 ogrenci=ogrenci, 
                 durum=durum,
-                notlar=ogrenci_notu # Modelinde 'notlar' alanı olduğunu varsayıyorum
+                not_durumu=ogrenci_notu
             )
         
         messages.success(request, 'Yoklama ve öğrenci notları başarıyla kaydedildi!')
