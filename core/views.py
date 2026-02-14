@@ -213,3 +213,40 @@ def sinif_sil(request, pk):
         Sinif.objects.filter(pk=pk).delete()
         messages.success(request, "Sınıf silindi.")
     return redirect('yonetim_siniflar')
+
+def register_view(request):
+    """Kayıt Sayfası (Geçici veya Kalıcı)"""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    # Eğer hazır bir register formun yoksa şimdilik sadece render eder
+    return render(request, 'register.html')
+
+# Views dosyanın en altına bunları ekleyebilirsin:
+
+def register_view(request):
+    return render(request, 'register.html')
+
+@login_required
+def takvim(request):
+    # Takvim fonksiyonu yukarıda yoksa diye:
+    return render(request, 'takvim.html')
+
+@login_required
+def yonetim_ogretmenler(request):
+    ogretmenler = User.objects.filter(role='ogretmen')
+    return render(request, 'yonetim/ogretmenler.html', {'ogretmenler': ogretmenler})
+
+@login_required
+def yonetim_siniflar(request):
+    siniflar = Sinif.objects.all()
+    return render(request, 'yonetim/siniflar.html', {'siniflar': siniflar})
+
+@login_required
+def yonetim_ogrenciler(request):
+    ogrenciler = Ogrenci.objects.all()
+    return render(request, 'yonetim/ogrenciler.html', {'ogrenciler': ogrenciler})
+
+@login_required
+def yonetim_ders_programi(request):
+    dersler = DersProgrami.objects.all()
+    return render(request, 'yonetim/ders_programi.html', {'dersler': dersler})
