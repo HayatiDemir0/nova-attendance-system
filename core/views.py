@@ -659,3 +659,17 @@ def ogrenci_not_duzenle(request, pk):
         return redirect('ogrenci_detay', pk=not_obj.ogrenci.id)
             
     return render(request, 'ogrenciler/ogrenci_not_duzenle.html', {'not_obj': not_obj})
+@login_required
+def ogrenci_not_sil(request, pk):
+    """Öğrenci Notunu Silme Fonksiyonu"""
+    not_obj = get_object_or_404(OgrenciNotu, pk=pk)
+    ogrenci_id = not_obj.ogrenci.id
+    
+    # Sadece admin veya notu oluşturan kişi silebilir
+    if request.user.role == 'admin' or not_obj.olusturan == request.user:
+        not_obj.delete()
+        messages.success(request, 'Not başarıyla silindi!')
+    else:
+        messages.error(request, 'Bu notu silme yetkiniz yok!')
+        
+    return redirect('ogrenci_detay', pk=ogrenci_id)

@@ -17,30 +17,28 @@ urlpatterns = [
     path('admin-panel/yoklamalar/', views.yonetim_yoklamalar, name='yonetim_yoklamalar'),
     path('admin-panel/ayarlar/', views.yonetim_ayarlar, name='yonetim_ayarlar'),
     
-    # Öğretmenler (Views içindeki isimlerle güncellendi)
-    path('ogretmenler/', views.yonetim_ogretmenler, name='ogretmen_listesi'), # ogretmen_listesi yerine yonetim_ogretmenler
+    # Öğretmen İşlemleri
     path('ogretmenler/ekle/', views.ogretmen_ekle, name='ogretmen_ekle'),
     path('ogretmenler/<int:pk>/duzenle/', views.ogretmen_duzenle, name='ogretmen_duzenle'),
     path('ogretmenler/<int:pk>/sil/', views.ogretmen_sil, name='ogretmen_sil'),
     
-    # Sınıflar (Views içindeki isimlerle güncellendi)
-    path('siniflar/', views.yonetim_siniflar, name='sinif_listesi'), # sinif_listesi yerine yonetim_siniflar
+    # Sınıf İşlemleri
     path('siniflar/ekle/', views.sinif_ekle, name='sinif_ekle'),
     path('siniflar/<int:pk>/duzenle/', views.sinif_duzenle, name='sinif_duzenle'),
     path('siniflar/<int:pk>/sil/', views.sinif_sil, name='sinif_sil'),
     
-    # Öğrenciler (Views içindeki isimlerle güncellendi)
-    path('ogrenciler/', views.yonetim_ogrenciler, name='ogrenci_listesi'), # ogrenci_listesi yerine yonetim_ogrenciler
+    # Öğrenci İşlemleri
     path('ogrenciler/ekle/', views.ogrenci_ekle, name='ogrenci_ekle'),
     path('ogrenciler/<int:pk>/detay/', views.ogrenci_detay, name='ogrenci_detay'),
     path('ogrenciler/<int:pk>/duzenle/', views.ogrenci_duzenle, name='ogrenci_duzenle'),
     path('ogrenciler/<int:pk>/sil/', views.ogrenci_sil, name='ogrenci_sil'),
-    path('ogrenciler/<int:pk>/not-ekle/', views.ogrenci_not_ekle, name='ogrenci_not_ekle'),
-    path('ogrenciler/<int:pk>/duzenle/', views.ogrenci_not_duzenle, name='ogrenci_not_duzenle'),
-    path('ogrenciler/<int:pk>/sil/', views.ogrenci_not_sil, name='ogrenci_not_sil'),
     
-    # Ders Programı (Views içindeki isimlerle güncellendi)
-    path('ders-programi/', views.yonetim_ders_programi, name='ders_programi_listesi'), # ders_programi_listesi yerine yonetim_ders_programi
+    # --- ÖĞRENCİ NOT İŞLEMLERİ (URL Çakışmaları Giderildi) ---
+    path('notlar/<int:ogrenci_id>/ekle/', views.ogrenci_not_ekle, name='ogrenci_not_ekle'),
+    path('notlar/<int:pk>/duzenle/', views.ogrenci_not_duzenle, name='ogrenci_not_duzenle'),
+    path('notlar/<int:pk>/sil/', views.ogrenci_not_sil, name='ogrenci_not_sil'),
+    
+    # Ders Programı
     path('ders-programi/ekle/', views.ders_programi_ekle, name='ders_programi_ekle'),
     path('ders-programi/<int:pk>/duzenle/', views.ders_programi_duzenle, name='ders_programi_duzenle'),
     path('ders-programi/<int:pk>/sil/', views.ders_programi_sil, name='ders_programi_sil'),
