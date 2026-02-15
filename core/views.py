@@ -584,7 +584,6 @@ def ogrenci_ekle(request):
         sinif_id = request.POST.get('sinif')
         veli_adi = request.POST.get('veli_adi', '').strip()
         veli_telefon = request.POST.get('veli_telefon', '').strip()
-        veli_email = request.POST.get('veli_email', '').strip()
         adres = request.POST.get('adres', '').strip()
         
         # Validasyon
@@ -613,7 +612,6 @@ def ogrenci_ekle(request):
             sinif_id=sinif_id,
             veli_adi=veli_adi,
             veli_telefon=veli_telefon,
-            veli_email=veli_email,
             adres=adres,
             fotograf=fotograf
         )

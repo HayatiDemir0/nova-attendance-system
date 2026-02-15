@@ -50,8 +50,6 @@ class Ogrenci(models.Model):
     sinif = models.ForeignKey(Sinif, on_delete=models.CASCADE, related_name='ogrenciler')
     veli_adi = models.CharField(max_length=100)
     veli_telefon = models.CharField(max_length=15)
-    veli_email = models.EmailField(max_length=254, null=True, blank=True)
-    fotograf = models.ImageField(upload_to='ogrenciler/', null=True, blank=True)
     adres = models.TextField(blank=True)
     kayit_tarihi = models.DateTimeField(auto_now_add=True)
     aktif = models.BooleanField(default=True)
