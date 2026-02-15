@@ -1,93 +1,172 @@
 {% extends 'base.html' %}
-
 {% block title %}Ders Programı - Yoklama Sistemi{% endblock %}
-
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Ders Programı</h2>
-    <a href="{% url 'ders_programi_ekle' %}" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> Yeni Ders Ekle
-    </a>
+
+<div style="background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); color: white; padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+    <div class="row align-items-center">
+        <div class="col">
+            <h1><i class="ti ti-calendar-event me-3"></i>Ders Programı</h1>
+            <p class="mb-0">Haftalık ders programını görüntüleyin ve yönetin</p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'ders_programi_ekle' %}" class="btn btn-light btn-lg">
+                <i class="ti ti-plus me-2"></i>Yeni Ders
+            </a>
+        </div>
+    </div>
 </div>
 
-<div class="card mb-3">
+<!-- FİLTRELEME -->
+<div class="card mb-4">
     <div class="card-body">
         <form method="get" class="row g-3">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label">Öğretmen</label>
                 <select name="ogretmen" class="form-select">
                     <option value="">Tüm Öğretmenler</option>
                     {% for ogretmen in ogretmenler %}
-                    <option value="{{ ogretmen.id }}">{{ ogretmen.get_full_name }}</option>
+                    <option value="{{ ogretmen.id }}" {% if secili_ogretmen == ogretmen.id|stringformat:"s" %}selected{% endif %}>
+                        {{ ogretmen.get_full_name }}
+                    </option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-4">
+            
+            <div class="col-md-3">
                 <label class="form-label">Sınıf</label>
                 <select name="sinif" class="form-select">
                     <option value="">Tüm Sınıflar</option>
                     {% for sinif in siniflar %}
-                    <option value="{{ sinif.id }}">{{ sinif.ad }}</option>
+                    <option value="{{ sinif.id }}" {% if secili_sinif == sinif.id|stringformat:"s" %}selected{% endif %}>
+                        {{ sinif.ad }}
+                    </option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-funnel"></i> Filtrele
+            
+            <div class="col-md-3">
+                <label class="form-label">Gün</label>
+                <select name="gun" class="form-select">
+                    <option value="">Tüm Günler</option>
+                    <option value="1" {% if secili_gun == "1" %}selected{% endif %}>Pazartesi</option>
+                    <option value="2" {% if secili_gun == "2" %}selected{% endif %}>Salı</option>
+                    <option value="3" {% if secili_gun == "3" %}selected{% endif %}>Çarşamba</option>
+                    <option value="4" {% if secili_gun == "4" %}selected{% endif %}>Perşembe</option>
+                    <option value="5" {% if secili_gun == "5" %}selected{% endif %}>Cuma</option>
+                    <option value="6" {% if secili_gun == "6" %}selected{% endif %}>Cumartesi</option>
+                    <option value="7" {% if secili_gun == "7" %}selected{% endif %}>Pazar</option>
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label">&nbsp;</label>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="ti ti-search me-2"></i>Filtrele
                 </button>
             </div>
         </form>
     </div>
 </div>
 
+<!-- DERS LİSTESİ -->
 <div class="card">
-    <div class="card-body">
-        {% if dersler %}
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Gün</th>
-                        <th>Ders Adı</th>
-                        <th>Öğretmen</th>
-                        <th>Sınıf</th>
-                        <th>Saat</th>
-                        <th>Durum</th>
-                        <th>İşlemler</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for ders in dersler %}
-                    <tr>
-                        <td><strong>{{ ders.get_gun_display }}</strong></td>
-                        <td>{{ ders.ders_adi }}</td>
-                        <td>{{ ders.ogretmen.get_full_name }}</td>
-                        <td><span class="badge bg-primary">{{ ders.sinif.ad }}</span></td>
-                        <td>{{ ders.baslangic_saati|time:"H:i" }} - {{ ders.bitis_saati|time:"H:i" }}</td>
-                        <td>
-                            {% if ders.aktif %}
-                                <span class="badge bg-success">Aktif</span>
+    <div class="card-header" style="background: #f8f9fa; border-bottom: 2px solid #FF9800;">
+        <h3>Toplam {{ dersler.count }} Ders</h3>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Gün</th>
+                    <th>Saat</th>
+                    <th>Ders Adı</th>
+                    <th>Sınıf</th>
+                    <th>Öğretmen</th>
+                    <th>Derslik</th>
+                    <th>Durum</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ders in dersler %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td><strong>{{ ders.get_gun_display }}</strong></td>
+                    <td>
+                        <span class="badge bg-primary" style="font-size:0.95rem;">
+                            {{ ders.baslangic_saati|time:"H:i" }} - {{ ders.bitis_saati|time:"H:i" }}
+                        </span>
+                    </td>
+                    <td><strong>{{ ders.ders_adi }}</strong></td>
+                    <td><span class="badge bg-info">{{ ders.sinif.ad }}</span></td>
+                    <td>{{ ders.ogretmen.get_full_name }}</td>
+                    <td>{{ ders.derslik|default:"-" }}</td>
+                    <td>
+                        {% if ders.aktif %}
+                        <span class="badge bg-success">Aktif</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Pasif</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'ders_programi_duzenle' ders.id %}" class="btn btn-sm btn-outline-primary" title="Düzenle">
+                            <i class="ti ti-edit"></i>
+                        </a>
+                        <a href="{% url 'ders_programi_sil' ders.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bu dersi silmek istediğinize emin misiniz?')" title="Sil">
+                            <i class="ti ti-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center py-5">
+                        <i class="ti ti-calendar-event" style="font-size: 4rem; opacity: 0.3;"></i>
+                        <p class="text-muted mt-3">
+                            {% if secili_ogretmen or secili_sinif or secili_gun %}
+                                Filtrelere uygun ders bulunamadı.
                             {% else %}
-                                <span class="badge bg-danger">Pasif</span>
+                                Henüz ders programı oluşturulmamış.
                             {% endif %}
-                        </td>
-                        <td>
-                            <a href="{% url 'ders_programi_duzenle' ders.pk %}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-pencil"></i> Düzenle
-                            </a>
-                            <a href="{% url 'ders_programi_sil' ders.pk %}" class="btn btn-sm btn-outline-danger" 
-                               onclick="return confirm('Bu dersi silmek istediğinize emin misiniz?')">
-                                <i class="bi bi-trash"></i> Sil
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <p class="text-muted text-center py-4">Henüz ders programı eklenmemiş.</p>
-        {% endif %}
+                        </p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
+
+<!-- İSTATİSTİKLER -->
+{% if dersler %}
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <h3 class="text-primary">{{ dersler.count }}</h3>
+                        <p class="text-muted mb-0">Toplam Ders</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h3 class="text-success">{{ ogretmenler.count }}</h3>
+                        <p class="text-muted mb-0">Öğretmen</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h3 class="text-info">{{ siniflar.count }}</h3>
+                        <p class="text-muted mb-0">Sınıf</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="mt-3">
+    <a href="{% url 'yonetim_panel' %}" class="btn btn-outline-secondary btn-lg">
+        <i class="ti ti-arrow-left me-2"></i>Geri
+    </a>
+</div>
+
 {% endblock %}

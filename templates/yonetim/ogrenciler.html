@@ -90,7 +90,8 @@
                         {% endif %}
                     </td>
                     <td>
-                        <a href="{% url 'ogrenci_detay' ogrenci.id %}" class="btn btn-sm btn-outline-info" title="Detay ve Notlar">
+                        <!-- DETAY/NOT BUTONU - ÖNEMLİ! -->
+                        <a href="{% url 'ogrenci_detay' ogrenci.id %}" class="btn btn-sm btn-info" title="Detay ve Notlar">
                             <i class="ti ti-eye"></i>
                         </a>
                         <a href="{% url 'ogrenci_duzenle' ogrenci.id %}" class="btn btn-sm btn-outline-primary" title="Düzenle">
