@@ -576,15 +576,16 @@ def ogrenci_ekle(request):
     siniflar = Sinif.objects.all()
     
     if request.method == 'POST':
-        ad = request.POST.get('ad', '').strip()
-        soyad = request.POST.get('soyad', '').strip()
-        tc_kimlik = request.POST.get('tc_kimlik', '').strip()
+        # Formdan gelen verileri alıyoruz
+        ad = request.POST.get('ad')
+        soyad = request.POST.get('soyad')
+        tc_kimlik = request.POST.get('tc_kimlik')
         dogum_tarihi = request.POST.get('dogum_tarihi')
         cinsiyet = request.POST.get('cinsiyet')
         sinif_id = request.POST.get('sinif')
-        veli_adi = request.POST.get('veli_adi', '').strip()
-        veli_telefon = request.POST.get('veli_telefon', '').strip()
-        adres = request.POST.get('adres', '').strip()
+        veli_adi = request.POST.get('veli_adi')
+        veli_telefon = request.POST.get('veli_telefon')
+        adres = request.POST.get('adres')
         
         # Validasyon
         if not ad or not soyad or not tc_kimlik or not dogum_tarihi or not sinif_id:
@@ -613,7 +614,6 @@ def ogrenci_ekle(request):
             veli_adi=veli_adi,
             veli_telefon=veli_telefon,
             adres=adres,
-            fotograf=fotograf
         )
         
         messages.success(request, f'{ad} {soyad} başarıyla eklendi!')
