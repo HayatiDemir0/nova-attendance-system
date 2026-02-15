@@ -85,7 +85,6 @@ class OgrenciForm(forms.ModelForm):
             'veli_adi': forms.TextInput(attrs={'class': 'form-control'}),
             'veli_telefon': forms.TextInput(attrs={'class': 'form-control'}),
             'adres': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'profil_resmi': forms.FileInput(attrs={'class': 'form-control'}),
             'aktif': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
         labels = {
