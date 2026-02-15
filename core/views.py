@@ -723,7 +723,7 @@ def ders_programi_ekle(request):
         messages.success(request, f'{ders_adi} dersi eklendi!')
         return redirect('yonetim_ders_programi')
     
-    return render(request, 'ders/ekle.html', {'ogretmenler': ogretmenler, 'siniflar': siniflar})
+    return render(request, 'ders_programi/ekle.html', {'ogretmenler': ogretmenler, 'siniflar': siniflar})
 
 
 @login_required
@@ -751,7 +751,7 @@ def ders_programi_duzenle(request, pk):
         messages.success(request, 'Ders programı güncellendi!')
         return redirect('yonetim_ders_programi')
     
-    return render(request, 'ders/duzenle.html', {
+    return render(request, 'ders_programi/duzenle.html', {
         'ders': ders,
         'ogretmenler': ogretmenler,
         'siniflar': siniflar
