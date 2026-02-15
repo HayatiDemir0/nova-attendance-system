@@ -20,7 +20,7 @@
         <div class="card text-center">
             <div class="card-body">
                 <h6 class="text-muted">Toplam</h6>
-                <h3>{{ istatistik.toplam }}</h3>
+                <h3>{{ toplam }}</h3>
             </div>
         </div>
     </div>
@@ -28,7 +28,7 @@
         <div class="card text-center border-success">
             <div class="card-body">
                 <h6 class="text-success">Var</h6>
-                <h3 class="text-success">{{ istatistik.var }}</h3>
+                <h3 class="text-success">{{ var_sayisi }}</h3>
             </div>
         </div>
     </div>
@@ -36,7 +36,7 @@
         <div class="card text-center border-danger">
             <div class="card-body">
                 <h6 class="text-danger">Yok</h6>
-                <h3 class="text-danger">{{ istatistik.yok }}</h3>
+                <h3 class="text-danger">{{ yok_sayisi }}</h3>
             </div>
         </div>
     </div>
@@ -44,7 +44,7 @@
         <div class="card text-center border-warning">
             <div class="card-body">
                 <h6 class="text-warning">İzinli/Geç</h6>
-                <h3 class="text-warning">{{ istatistik.izinli|add:istatistik.gec }}</h3>
+                <h3 class="text-warning">{{ izinli_sayisi }}</h3>
             </div>
         </div>
     </div>

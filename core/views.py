@@ -879,9 +879,12 @@ def yoklama_detay(request, pk):
     context = {
         'yoklama': yoklama,
         'detaylar': detaylar,
-        'toplam': toplam,
-        'var_sayisi': var_sayisi,
-        'yok_sayisi': yok_sayisi,
-        'izinli_sayisi': izinli_sayisi,
+        'istatistik': {  # Verileri bu sözlük içine paketliyoruz
+            'toplam': toplam,
+            'var': var_sayisi,
+            'yok': yok_sayisi,
+            'izinli': izinli_sayisi,
+            'gec': 0  # Eğer view'da gec_sayisi varsa onu yazın
+        }
     }
     return render(request, 'yoklama/detay.html', context)
