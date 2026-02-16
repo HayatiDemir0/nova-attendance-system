@@ -21,12 +21,13 @@ INSTALLED_APPS = [
     'core',
     'crispy_forms',
     'crispy_bootstrap4',
+
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'core.middleware.AdminSessionMiddleware',  # Django admin için ayrı session cookie
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -55,6 +56,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'yoklama_sistemi.wsgi.application'
 
 # Database
+# Eski DATABASES kısmını tamamen sil ve bunu yapıştır
 DATABASES = {
     'default': dj_database_url.parse('postgresql://yoklama_user:whusmyvWraa95Is9pP2hN2Yy4KutKneA@dpg-d65ql1lum26s73ag41s0-a/yoklama_db_ybl3')
 }
@@ -88,11 +90,6 @@ AUTH_USER_MODEL = 'core.User'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
-
-# ==================== AYRI SESSION COOKIE ====================
-# Django admin (/admin/) ve öğretmen paneli aynı tarayıcıda
-# aynı anda çalışabilsin diye admin için ayrı cookie tanımlıyoruz
-SESSION_COOKIE_NAME = 'yoklama_sessionid'
 
 # Crispy Forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
