@@ -29,7 +29,7 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
 
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'core.middleware.AdminSessionMiddleware',   # 👈 BUNU EKLE
+    'core.middleware.AdminSessionMiddleware', 
 
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
