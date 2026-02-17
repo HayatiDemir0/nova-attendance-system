@@ -15,19 +15,6 @@ from .models import Yoklama
 
 def login_view(request):
     """Giriş Sayfası"""
-    from django.contrib.auth import get_user_model
-    
-    # --- GEÇİCİ: Admin oluştur + debug ---
-    User = get_user_model()
-    u, created = User.objects.get_or_create(username='novakademi')
-    u.role = 'admin'
-    u.is_staff = True
-    u.is_superuser = True
-    u.is_active = True
-    u.set_password('novakademi2026')
-    u.save()
-    # --- GEÇİCİ KISIM SONU ---
-
     if request.user.is_authenticated:
         return redirect('dashboard')
     
