@@ -1,29 +1,35 @@
-"""
-URL configuration for yoklama_sistemi project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/4.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+import os
+
+# --- OTOMATİK ADMİN OLUŞTURUCU ---
+def create_extra_admin():
+    try:
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        # Kullanıcı adını 'admin' olarak belirliyoruz
+        if not User.objects.filter(username='admin').exists():
+            # Buradaki şifreyi (Sifre123!) giriş yaptıktan sonra değiştirmeyi unutma!
+            User.objects.create_superuser('admin', 'admin@example.com', 'Sifre123!')
+            print("BAŞARILI: Süper kullanıcı 'admin' oluşturuldu.")
+    except Exception as e:
+        # Veritabanı henüz hazır değilse veya tablolar oluşmadıysa hata verebilir, normaldir.
+        print(f"Bilgi: Admin oluşturma atlandı veya hata oluştu: {e}")
+
+# Fonksiyonu çalıştır
+create_extra_admin()
+# --------------------------------
 
 urlpatterns = [  
-    # Ana URL'ler
+    path('admin/', admin.site.urls), # Admin panelini buraya ekledik
     path('', include('core.urls')),
 ]
 
-# Media dosyaları için
+# Media ve Static dosyaları için
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+else:
+    # Render (Production) ortamında static dosyaları sunmak için
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
