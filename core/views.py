@@ -15,30 +15,18 @@ from .models import Yoklama
 
 def login_view(request):
     """Giriş Sayfası"""
-    # --- GEÇİCİ DEBUG (sonra sil) ---
-    if request.GET.get('setup') == 'nova':
-        from django.contrib.auth import get_user_model
-        from django.http import HttpResponse
-        User = get_user_model()
-        try:
-            u, created = User.objects.get_or_create(username='novakademi')
-            u.role = 'admin'
-            u.is_staff = True
-            u.is_superuser = True
-            u.is_active = True
-            u.set_password('novakademi2026')
-            u.save()
-            
-            test_user = authenticate(username='novakademi', password='novakademi2026')
-            return HttpResponse(
-                f"Created: {created}<br>"
-                f"Role: {u.role}<br>"
-                f"Active: {u.is_active}<br>"
-                f"Auth test: {'OK' if test_user else 'FAIL'}"
-            )
-        except Exception as e:
-            return HttpResponse(f"HATA: {e}")
-    # --- GEÇİCİ DEBUG SONU ---
+    from django.contrib.auth import get_user_model
+    
+    # --- GEÇİCİ: Admin oluştur + debug ---
+    User = get_user_model()
+    u, created = User.objects.get_or_create(username='novakademi')
+    u.role = 'admin'
+    u.is_staff = True
+    u.is_superuser = True
+    u.is_active = True
+    u.set_password('novakademi2026')
+    u.save()
+    # --- GEÇİCİ KISIM SONU ---
 
     if request.user.is_authenticated:
         return redirect('dashboard')
