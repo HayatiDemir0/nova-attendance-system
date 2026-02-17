@@ -646,10 +646,7 @@ def ogrenci_ekle(request):
             messages.error(request, 'Bu TC Kimlik numarası zaten kayıtlı!')
             return redirect('ogrenci_ekle')
         
-        # Fotoğraf
-        fotograf = request.FILES.get('fotograf')
-        
-        # Öğrenci oluştur
+        # Öğrenci oluştur (veli_email ve fotograf kısımları kaldırıldı)
         Ogrenci.objects.create(
             ad=ad,
             soyad=soyad,
@@ -666,7 +663,6 @@ def ogrenci_ekle(request):
         return redirect('yonetim_ogrenciler')
     
     return render(request, 'ogrenciler/ekle.html', {'siniflar': siniflar})
-
 
 @login_required
 def ogrenci_duzenle(request, pk):

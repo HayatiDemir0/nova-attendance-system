@@ -49,17 +49,9 @@ class Ogrenci(models.Model):
     dogum_tarihi = models.DateField(null=True, blank=True)
     cinsiyet = models.CharField(max_length=1, choices=CINSIYET_CHOICES, null=True, blank=True)
     sinif = models.ForeignKey(Sinif, on_delete=models.CASCADE, related_name='ogrenciler')
-    
-    # ✅ EKLENDİ - VELİ BİLGİLERİ
     veli_adi = models.CharField(max_length=100, blank=True, null=True)
     veli_telefon = models.CharField(max_length=15, blank=True, null=True)
-    veli_email = models.EmailField(blank=True, null=True)
-    
-    adres = models.TextField(blank=True, null=True)
-    
-    # ✅ EKLENDİ - FOTOĞRAF
-    fotograf = models.ImageField(upload_to='ogrenci_fotograflari/', blank=True, null=True)
-    
+    adres = models.TextField(blank=True, null=True)  
     kayit_tarihi = models.DateTimeField(auto_now_add=True)
     aktif = models.BooleanField(default=True)
     
