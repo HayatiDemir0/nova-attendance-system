@@ -56,10 +56,17 @@ TEMPLATES = [
 WSGI_APPLICATION = 'yoklama_sistemi.wsgi.application'
 
 # Database
-# Eski DATABASES kısmını tamamen sil ve bunu yapıştır
-DATABASES = {
-    'default': dj_database_url.parse('postgresql://yoklama_user:4h01aoOciX3vFxlsgstO1gLyaiMD2JDv@dpg-d6a4k4jh46gs7388kbc0-a/yoklama_db_ybl3_lw6w')
-}
+if os.environ.get('DATABASE_URL'):
+    DATABASES = {
+        'default': dj_database_url.config()
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Şifre doğrulama
 AUTH_PASSWORD_VALIDATORS = [
