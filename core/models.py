@@ -45,12 +45,12 @@ class Ogrenci(models.Model):
     ad = models.CharField(max_length=50)
     soyad = models.CharField(max_length=50)
     tc_kimlik = models.CharField(max_length=11, unique=True)
-    dogum_tarihi = models.DateField(null=True, blank=True) # Boş geçilebilir yaptık
+    dogum_tarihi = models.DateField(null=True, blank=True)
     cinsiyet = models.CharField(max_length=1, choices=CINSIYET_CHOICES, null=True, blank=True)
     sinif = models.ForeignKey(Sinif, on_delete=models.CASCADE, related_name='ogrenciler')
-    veli_adi = models.CharField(max_length=100, null=True, blank=True)
-    veli_telefon = models.CharField(max_length=15, null=True, blank=True)
-    adres = models.TextField(blank=True)
+    adres = models.TextField(blank=True, null=True)
+    kayit_tarihi = models.DateTimeField(auto_now_add=True)
+    aktif = models.BooleanField(default=True)
     
     class Meta:
         db_table = 'ogrenciler'
