@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
+
 class User(AbstractUser):
     ROLE_CHOICES = (
         ('admin', 'Admin'),
@@ -48,7 +49,17 @@ class Ogrenci(models.Model):
     dogum_tarihi = models.DateField(null=True, blank=True)
     cinsiyet = models.CharField(max_length=1, choices=CINSIYET_CHOICES, null=True, blank=True)
     sinif = models.ForeignKey(Sinif, on_delete=models.CASCADE, related_name='ogrenciler')
+    
+    # ✅ EKLENDİ - VELİ BİLGİLERİ
+    veli_adi = models.CharField(max_length=100, blank=True, null=True)
+    veli_telefon = models.CharField(max_length=15, blank=True, null=True)
+    veli_email = models.EmailField(blank=True, null=True)
+    
     adres = models.TextField(blank=True, null=True)
+    
+    # ✅ EKLENDİ - FOTOĞRAF
+    fotograf = models.ImageField(upload_to='ogrenci_fotograflari/', blank=True, null=True)
+    
     kayit_tarihi = models.DateTimeField(auto_now_add=True)
     aktif = models.BooleanField(default=True)
     
@@ -138,15 +149,15 @@ class YoklamaDetay(models.Model):
     def __str__(self):
         return f"{self.ogrenci.tam_ad} - {self.durum}"
 
+
 class OgrenciNotu(models.Model):
     KATEGORI_CHOICES = [
+        ('genel', 'Genel Not'),
         ('tatil', 'Tatil/İzin'),
-        ('odeme', 'Ödeme Gecikmesi/Durumu'),
+        ('odeme', 'Ödeme'),          # ✅ TEK SEFER
         ('disiplin', 'Disiplin'),
         ('saglik', 'Sağlık'),
         ('basari', 'Başarı/Ödül'),
-        ('genel', 'Genel Not'),
-        ('odeme', 'Ödeme'),
     ]
     
     ogrenci = models.ForeignKey(Ogrenci, on_delete=models.CASCADE, related_name='notlar')
@@ -170,6 +181,7 @@ class OgrenciNotu(models.Model):
     def get_kategori_icon(self):
         icons = {
             'tatil': 'ti-beach',
+            'odeme': 'ti-cash',           # ✅ EKLENDİ
             'disiplin': 'ti-alert-triangle',
             'saglik': 'ti-heartbeat',
             'basari': 'ti-trophy',
@@ -181,7 +193,7 @@ class OgrenciNotu(models.Model):
         colors = {
             'tatil': 'info',
             'odeme': 'danger',
-            'disiplin': 'danger',
+            'disiplin': 'warning',        # ✅ DÜZELTİLDİ (danger'dan warning'e)
             'saglik': 'warning',
             'basari': 'success',
             'genel': 'secondary',
