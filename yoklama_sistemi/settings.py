@@ -8,7 +8,7 @@ SECRET_KEY = 'django-insecure-yoklama-projesi-2025-gizli-anahtar-12345'
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', 'academynova.online', 'www.academynova.online', 'nova-attendance-system-blig.onrender.com']
 
 # Uygulamalar
 INSTALLED_APPS = [
